@@ -1,0 +1,20 @@
+<mat-card class="resumen-card">
+  <mat-card-content>
+    <div class="card-header">
+      <div class="card-icon-wrapper">
+        <mat-icon class="card-icon">{{ card.icono }}</mat-icon>
+      </div>
+      <h3 class="card-titulo">{{ card.titulo }}</h3>
+    </div>
+
+    <div class="card-valor-section">
+      <p class="card-valor">{{ card.valor }}</p>
+      <div class="card-tendencia" [ngClass]="getTendenciaClass()">
+        <mat-icon class="tendencia-icon">{{ getTendenciaIcon() }}</mat-icon>
+        <span class="tendencia-text">{{ card.tendencia > 0 ? '+' : '' }}{{ card.tendencia }}%</span>
+      </div>
+    </div>
+
+    <p class="card-descripcion">{{ card.descripcion }}</p>
+  </mat-card-content>
+</mat-card>

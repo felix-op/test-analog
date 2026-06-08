@@ -19,8 +19,10 @@
       "@core/*": ["./src/app/core/*"],
       "@shared/*": ["./src/app/shared/*"],
       "@models/*": ["./src/app/models/*"],
+      "@features/*": ["./src/app/features/*"],
       "@styles/*": ["./src/styles/*"]
     }
+
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -1,0 +1,10 @@
+<div class="home-container">
+  <header class="home-header">
+    <h1>Dashboard</h1>
+    <p class="subtitle">Bienvenido al panel de control</p>
+  </header>
+
+  <section class="tarjetas-grid">
+    <app-resumen-card *ngFor="let tarjeta of tarjetas" [card]="tarjeta"></app-resumen-card>
+  </section>
+</div>
