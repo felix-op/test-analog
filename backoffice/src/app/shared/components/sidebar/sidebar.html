@@ -1,0 +1,35 @@
+<div class="sidebar-wrapper">
+    <mat-nav-list class="nav-group">
+        <a mat-list-item routerLink="/inicio" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>home</mat-icon>
+            <span matListItemTitle>Inicio</span>
+        </a>
+        <a mat-list-item routerLink="/inventario" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>inventory_2</mat-icon>
+            <span matListItemTitle>Inventario</span>
+        </a>
+        <a mat-list-item routerLink="/ingredientes" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>set_meal</mat-icon>
+            <span matListItemTitle>Ingredientes</span>
+        </a>
+        <a mat-list-item routerLink="/proveedores" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>local_shipping</mat-icon>
+            <span matListItemTitle>Proveedores</span>
+        </a>
+    </mat-nav-list>
+
+    <mat-nav-list class="nav-group">
+        <a mat-list-item routerLink="/soporte" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>help</mat-icon>
+            <span matListItemTitle>Ayuda y Soporte</span>
+        </a>
+        <a mat-list-item routerLink="/configuracion" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>settings</mat-icon>
+            <span matListItemTitle>Configuración</span>
+        </a>
+        <a mat-list-item (click)="logout()">
+            <mat-icon matListItemIcon>logout</mat-icon>
+            <span matListItemTitle>Cerrar Sesión</span>
+        </a>
+    </mat-nav-list>
+</div>  

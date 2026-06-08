@@ -1,0 +1,23 @@
+// Fondos (Variaciones de grises oscuros y profundos)
+$color-page:          #121214; // Fondo general (gris noche muy oscuro)
+$color-header:        #1a1a1e; // Ligeramente más claro para destacar la barra superior
+$color-sidebar:       #161619; // Entre el fondo de página y los contenedores
+$color-card:          #1e1e24; // Fondo de componentes contenedor (capa superior)
+$color-disabled:      #2a2a30; // Fondo para elementos bloqueados
+$color-divider:       #2d2d34; // Líneas de separación sutiles de bajo contraste
+
+// Actions (Tonos pastel / desaturados para modo oscuro)
+$color-primary:       #5c93cf; // Azul claro/pastel, visible sobre fondo oscuro sin deslumbrar
+$color-secondary:     #a0aec0; // Gris claro frío
+$color-warn:          #f3af57; // Ámbar suave
+$color-danger:        #e57373; // Coral claro
+$color-success:       #81c784; // Verde pastel menta
+
+// Text (Altas emisiones de luz controladas)
+$color-text-main:     #f8f9fa; // Títulos y texto de alta prioridad (blanco hueso)
+$color-text-body:     #c5c5c9; // Texto de lectura general (gris claro)
+$color-text-disabled: #64646c; // Texto secundario o deshabilitado
+
+// Border (Tokens de estructura)
+$border-width:        1px;
+$border-radius:       12px;

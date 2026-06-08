@@ -11,6 +11,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
+          "path": "src/app/shared/components",
           "style": "scss"
         }
       },

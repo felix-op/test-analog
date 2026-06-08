@@ -1,0 +1,24 @@
+<mat-toolbar class="header-toolbar">
+  <div class="header-left">
+    <button mat-icon-button class="menu-button" (click)="onToggle()" aria-label="Abrir menú">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span class="header-title">Mi Aplicación</span>
+  </div>
+
+  <div class="header-actions">
+    <button
+      mat-icon-button
+      class="theme-toggle-button"
+      (click)="onToggleTheme()"
+      [attr.aria-label]="theme() === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+    >
+      <mat-icon>{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+    <img
+      class="user-avatar"
+      src="https://i.pravatar.cc/40?img=3"
+      alt="Avatar del usuario"
+    />
+  </div>
+</mat-toolbar>

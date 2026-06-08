@@ -1,0 +1,23 @@
+// Fondos (Variaciones de grises cálidos/fríos muy tenues)
+$color-page:          #f8f9fa; // Fondo general limpio
+$color-header:        #ffffff; // Destaca sobre el fondo de la página
+$color-sidebar:       #f1f3f5; // Ligeramente más oscuro para delimitar jerarquía
+$color-card:          #ffffff; // Fondo de componentes contenedor
+$color-disabled:      #e9ecef; // Fondo para elementos bloqueados
+$color-divider:       #dee2e6; // Líneas de separación sutiles
+
+// Actions (Tonos pastel / desaturados, no chillones)
+$color-primary:       #4a7bb0; // Azul suave, no eléctrico
+$color-secondary:     #6c757d; // Gris neutro medio
+$color-warn:          #e6a23c; // Ámbar/Naranja suave
+$color-danger:        #e06c75; // Coral/Rojo atenuado
+$color-success:       #67c23a; // Verde salvia/suave
+
+// Text (Grises oscuros en lugar de negro puro para reducir fatiga visual)
+$color-text-main:     #212529; // Títulos y texto de alta prioridad
+$color-text-body:     #495057; // Texto de lectura general
+$color-text-disabled: #adb5bd; // Texto secundario o deshabilitado
+
+// Border (Tokens de estructura)
+$border-width:        1px;
+$border-radius:       12px; // Asumiendo que los 12px originales eran el radio

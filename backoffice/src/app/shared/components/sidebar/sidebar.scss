@@ -1,0 +1,73 @@
+/* Contenedor principal del componente */
+.sidebar-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 8px 0;
+    overflow: hidden;
+}
+
+/* Forzar a las listas a comportarse como bloques verticales */
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Apuntar al contenedor interno de alineación que genera Angular Material 
+  dentro de cada elemento de lista para corregir el layout inline
+*/
+.nav-group ::ng-deep .mdc-list-item__content {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 12px;
+    /* Separación exacta entre icono y texto */
+    width: 100%;
+}
+
+/* Estilos de los enlaces de navegación */
+[mat-list-item] {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--mat-sys-on-surface-variant);
+    border-radius: 28px;
+    /* Diseño moderno estilo Material 3 Pill */
+    padding: 8px 4px;
+    padding-left: 10px;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+[mat-list-item]:hover,
+[mat-list-item]:focus-visible {
+    background-color: rgba(100, 110, 255, 0.08);
+    color: var(--mat-sys-on-surface);
+    transform: translateX(2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* Estado activo */
+.active-link {
+    background-color: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    font-weight: 500;
+    animation: nav-item-selected 240ms ease-out;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes nav-item-selected {
+    0% {
+        transform: scale(0.98);
+        opacity: 0.92;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

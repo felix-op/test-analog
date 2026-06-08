@@ -1,1 +1,129 @@
 /* You can add global styles to this file, and also import other style files */
+// @use './styles/light-theme' as light;
+// @use './styles/dark-theme' as dark;
+
+// :root {
+//     --color-page: #{light.$color-page};
+//     --color-header: #{light.$color-header};
+//     --color-sidebar: #{light.$color-sidebar};
+//     --color-card: #{light.$color-card};
+//     --color-disabled: #{light.$color-disabled};
+//     --color-divider: #{light.$color-divider};
+//     --color-primary: #{light.$color-primary};
+//     --color-secondary: #{light.$color-secondary};
+//     --color-warn: #{light.$color-warn};
+//     --color-danger: #{light.$color-danger};
+//     --color-success: #{light.$color-success};
+//     --color-text-main: #{light.$color-text-main};
+//     --color-text-body: #{light.$color-text-body};
+//     --color-disabled: #{light.$color-disabled};
+
+//     --border-width: #{light.$border-width};
+//     --border-radius: #{light.$border-radius};
+
+//     transition: background-color 0.2s ease, color 0.2s ease;
+
+// }
+
+// // Sobreescritura de variables cuando se activa el modo oscuro
+// :root.dark-mode {
+//     --color-page: #{dark.$color-page};
+//     --color-header: #{dark.$color-header};
+//     --color-sidebar: #{dark.$color-sidebar};
+//     --color-card: #{dark.$color-card};
+//     --color-disabled: #{dark.$color-disabled};
+//     --color-divider: #{dark.$color-divider};
+//     --color-primary: #{dark.$color-primary};
+//     --color-secondary: #{dark.$color-secondary};
+//     --color-warn: #{dark.$color-warn};
+//     --color-danger: #{dark.$color-danger};
+//     --color-success: #{dark.$color-success};
+//     --color-text-main: #{dark.$color-text-main};
+//     --color-text-body: #{dark.$color-text-body};
+//     --color-disabled: #{dark.$color-disabled};
+
+//     --border-width: #{dark.$border-width};
+//     --border-radius: #{dark.$border-radius};
+// }
+
+// html,
+// body {
+//     margin: 0;
+//     padding: 0;
+//     height: 100%;
+//     width: 100%;
+//     background-color: var(--color-page);
+//     color: var(--color-text-body);
+// }
+
+// * {
+//     box-sizing: border-box;
+// }
+
+// .stack {
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//     flex-direction: column;
+// }
+
+
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$light-theme: (
+  color: mat.$violet-palette,
+  typography: Roboto,
+  density: 0,
+);
+
+$dark-theme: (
+  color: (
+    primary: mat.$violet-palette,
+    theme-type: dark,
+  ),
+  typography: Roboto,
+  density: 0,
+);
+
+html {
+  color-scheme: light;
+  margin: 0;
+  @include mat.theme($light-theme);
+}
+
+html.dark-mode {
+  color-scheme: dark;
+  @include mat.theme($dark-theme);
+  color: var(--mat-sys-on-surface);
+}
+
+body {
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  margin: 0;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+
+// @use '@angular/material' as mat;
+
+// @include mat.core();
+
+// html {
+//   color-scheme: light dark;
+//   @include mat.theme((
+//     color: mat.$violet-palette,
+//     typography: Roboto,
+//     density: 0
+//   ));
+// }
+
+// body {
+//   background: var(--mat-sys-surface);
+//   color: var(--mat-sys-on-surface);
+//   margin: 0;
+//   font-family: Roboto, "Helvetica Neue", sans-serif;
+//   transition: background-color 200ms ease, color 200ms ease;
+// }
