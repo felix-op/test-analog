@@ -29,3 +29,10 @@ Te están pidiendo que tu base de datos o estructura de datos tenga al menos dos
 - La Entidad Central es el "Artículo" del blog.
 - La relación de pertenencia está en las "Categorías" de la Barra de Navegación (cada artículo tiene su categoría vinculada).
 - La navegación a la ficha se cumple cuando pasas de la lista principal de artículos al renderizador (`blog-render`) que te muestra el contenido JSON expandido de ese artículo específico.
+
+
+5. Comparación de Layouts (Estructura Visual): AnalogJS vs Expo
+- El concepto de "Layout": En Expo Router usas archivos `_layout.tsx` y el componente `<Slot />` para definir qué parte de la pantalla es fija (como un menú superior) y qué parte cambia. En AnalogJS (Angular web), haces lo mismo pero usando el componente raíz (`app.ts`) o un componente de layout, y usas la etiqueta `<router-outlet />` en lugar de `<Slot />`.
+- Ordenamiento (Flexbox vs Grid): En Expo, absolutamente todo usa Flexbox por defecto (cada `<View>` es una columna flex). No existe CSS Grid tradicional. En la web (AnalogJS) usas Flexbox, pero también tienes el inmenso poder de CSS Grid (ej. `grid-cols-12`), que hace mucho más fácil lograr estructuras complejas (como dividir la pantalla en dos columnas asimétricas) sin tantas matemáticas.
+- Etiquetas (Tags): En Expo estás limitado a los componentes nativos del celular (`<View>`, `<Text>`, `<ScrollView>`). En AnalogJS usas etiquetas de HTML semántico puro (`<main>`, `<aside>`, `<article>`, `<div>`), lo cual es clave para el SEO (posicionamiento en Google).
+- En resumen: Tu `<Slot>` de Expo es el `<router-outlet>` de Angular. Tus `<View>` son los `<div>`. En ambos mundos, Flexbox es tu herramienta principal para ordenar elementos, pero la web te regala CSS Grid para hacer layouts avanzados de forma más sencilla.
