@@ -86,11 +86,11 @@ import { Article } from '../types/blog.type';
                 <!-- Botón rápido para escribir -->
                 <button 
                   (click)="createNewArticle()"
-                  class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">
+                  class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-black text-xs font-semibold rounded-lg shadow-sm transition-colors cursor-pointer">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5H4.5" />
                   </svg>
-                  Redactar Post
+                  Crear Nuevo Post
                 </button>
               </div>
 
