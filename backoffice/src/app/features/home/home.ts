@@ -1,11 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResumenCardComponent } from '@components/resumen-card/resumen-card';
+import { IngredienteCardComponent } from '@components/ingrediente-card/ingrediente-card';
+import { InventarioCardComponent } from '@components/inventario-card/inventario-card';
 import type { ResumenCard } from '@models/resumen-card.model';
+import type { IngredienteCard } from '@models/ingrediente-card.model';
+import type { InventarioCard } from '@models/inventario-card.model';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, ResumenCardComponent],
+  standalone: true,
+  imports: [CommonModule, ResumenCardComponent, IngredienteCardComponent, InventarioCardComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -46,6 +51,54 @@ export class HomePage {
       icono: 'trending_up',
       tendencia: 8,
       colorTendencia: 'success',
+    },
+  ];
+
+  ingredientes: IngredienteCard[] = [
+    {
+      id: 'granos-cafe-java',
+      nombre: 'Granos de Café Java',
+      cantidadDisponible: 25,
+      cantidadMaxima: 300,
+      estado: 'faltante',
+    },
+    {
+      id: 'azucar',
+      nombre: 'Azúcar',
+      cantidadDisponible: 79,
+      cantidadMaxima: 400,
+      estado: 'limite vencimiento',
+    },
+    {
+      id: 'leche',
+      nombre: 'Leche',
+      cantidadDisponible: 290,
+      cantidadMaxima: 100,
+      estado: 'disponible',
+    },
+  ];
+
+  inventario: InventarioCard[] = [
+    {
+      id: 'cafe-java',
+      nombre: 'Café Java',
+      cantidadDisponible: 25,
+      cantidadMaxima: 300,
+      estado: 'faltante',
+    },
+    {
+      id: 'harina',
+      nombre: 'Harina',
+      cantidadDisponible: 79,
+      cantidadMaxima: 100,
+      estado: 'limite compra',
+    },
+    {
+      id: 'salsa',
+      nombre: 'Salsa',
+      cantidadDisponible: 290,
+      cantidadMaxima: 300,
+      estado: 'disponible',
     },
   ];
 }

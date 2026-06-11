@@ -6,6 +6,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
+  standalone: true,
   imports: [MatButtonModule, MatIcon, MatToolbarModule],
   templateUrl: './header.html',
   styleUrl: './header.scss',

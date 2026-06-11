@@ -6,6 +6,7 @@ import type { ResumenCard } from '@models/resumen-card.model';
 
 @Component({
   selector: 'app-resumen-card',
+  standalone: true,
   imports: [CommonModule, MatCardModule, MatIconModule],
   templateUrl: './resumen-card.html',
   styleUrl: './resumen-card.scss',

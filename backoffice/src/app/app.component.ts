@@ -40,6 +40,7 @@ import { SidebarComponent } from "@components/sidebar/sidebar";
     box-sizing: border-box;
     padding: 16px;
     border-right: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 0px;
     background: var(--mat-sys-surface-container);
   }
 

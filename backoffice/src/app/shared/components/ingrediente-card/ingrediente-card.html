@@ -1,0 +1,19 @@
+<mat-card class="estado-card-shell" [ngClass]="getShellClass()">
+  <mat-card class="estado-card">
+    <mat-card-content>
+      <div class="card-top">
+        <div>
+          <p class="status-pill" [ngClass]="getEstadoClass()">{{ card.estado }}</p>
+          <h3 class="card-title">{{ card.nombre }}</h3>
+        </div>
+      </div>
+
+      <div class="progress-block">
+        <div class="progress-value">{{ card.cantidadDisponible }} / {{ card.cantidadMaxima }}</div>
+        <div class="progress-bar">
+          <span class="progress-fill" [ngClass]="getEstadoClass()" [style.width.%]="getProgress()"></span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</mat-card>

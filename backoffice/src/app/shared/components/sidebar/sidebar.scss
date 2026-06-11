@@ -55,7 +55,7 @@
 /* Estado activo */
 .active-link {
     background-color: var(--mat-sys-secondary-container);
-    color: var(--mat-sys-on-secondary-container);
+    color: var(--mat-sys-on-primary-container);
     font-weight: 500;
     animation: nav-item-selected 240ms ease-out;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);

@@ -4,7 +4,30 @@
     <p class="subtitle">Bienvenido al panel de control</p>
   </header>
 
-  <section class="tarjetas-grid">
-    <app-resumen-card *ngFor="let tarjeta of tarjetas" [card]="tarjeta"></app-resumen-card>
+  <section class="dashboard-section">
+    <h2>Resumen rápido</h2>
+    <div class="tarjetas-grid">
+      <app-resumen-card *ngFor="let tarjeta of tarjetas" [card]="tarjeta"></app-resumen-card>
+    </div>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="section-header">
+      <h2>Inventario</h2>
+      <p>Estado actual del stock</p>
+    </div>
+    <div class="tarjetas-flex">
+      <app-inventario-card *ngFor="let item of inventario" [card]="item"></app-inventario-card>
+    </div>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="section-header">
+      <h2>Ingredientes</h2>
+      <p>Control de ingredientes críticos</p>
+    </div>
+    <div class="tarjetas-flex">
+      <app-ingrediente-card *ngFor="let item of ingredientes" [card]="item"></app-ingrediente-card>
+    </div>
   </section>
 </div>
