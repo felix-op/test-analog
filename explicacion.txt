@@ -1,0 +1,31 @@
+Explicación de la Lógica y Comparación con React + Expo
+
+1. ¿Cómo funciona la lógica de la BlogPage?
+La BlogPage utiliza una arquitectura basada en componentes de Angular (a través de AnalogJS). 
+Tenemos un componente central (por ejemplo, `blog-editor`) que maneja el estado local del artículo que se está creando o editando. Utilizamos librerías externas (como EditorJS) para la edición rica de texto. Cuando el usuario guarda, los datos del artículo (título, contenido, autor, imágenes, categoría) se estructuran en formato JSON.
+En lugar de una base de datos real, simulamos el almacenamiento guardando estos objetos JSON en la memoria y los renderizamos iterando sobre ellos usando directivas (como `@for`) en la vista. La barra de navegación filtra estos artículos comparando la categoría seleccionada con la categoría de cada artículo.
+
+2. ¿Cómo funciona el @Component y su 'template'? (Comparación con Expo)
+En Angular/AnalogJS, `@Component` es un decorador. Un decorador es como una etiqueta especial que le dice al framework: "Esta clase de TypeScript que viene a continuación no es una clase normal, es un componente de la interfaz gráfica".
+Dentro del `@Component` definimos cosas clave como:
+- `selector`: El nombre de la etiqueta HTML personalizada (ej. `<app-blog-editor>`).
+- `standalone`: Si es true, el componente es independiente y no necesita módulos complejos (se parece más a un componente funcional de React).
+- `template`: Es el HTML de la vista. A diferencia de React (que usa JSX/TSX para mezclar lógica y vista en la misma función), Angular separa la estructura (HTML) de la lógica (TypeScript).
+- `styles`: Los estilos CSS específicos para este componente.
+
+En Expo (React Native), no usas decoradores. Escribes una función de JavaScript que retorna código JSX (etiquetas como <View> o <Text>). En Expo, los estilos suelen ir en objetos de JavaScript (`StyleSheet.create`), ya que React Native no usa CSS tradicional. En AnalogJS (Angular web), es mejor y más óptimo separar o usar clases CSS (como Tailwind) o archivos CSS, ya que los navegadores web están ultra-optimizados para leer y cachear CSS real de forma paralela al HTML. Por eso te recomendé usar CSS externo o de utilidad en lugar de estilos en línea en el HTML.
+
+3. Explicación de la frase de la universidad
+Frase: "De mínima la estructura debe ser: Una entidad central con una relación de pertenencia pero se valorará incorporar una relación MxN. Finalmente, navegar a la ficha de un elemento mostrando sus datos."
+
+Traducción a palabras simples (lenguaje cotidiano):
+Te están pidiendo que tu base de datos o estructura de datos tenga al menos dos "cosas" (entidades) conectadas.
+- "Entidad central con relación de pertenencia (1 a N)": Imagina que tienes "Categorías" y "Artículos". Una Categoría tiene muchos Artículos, pero un Artículo específico pertenece a una sola Categoría. Esa es la relación mínima que te piden.
+- "Relación MxN (Muchos a Muchos)": Es un extra para subir nota. Por ejemplo, si un Artículo tiene muchas "Etiquetas" (#tecnología, #nuevo), y una Etiqueta pertenece a muchos Artículos.
+- "Navegar a la ficha de un elemento": Significa que debe haber una pantalla con la lista de cosas (ej. tarjetas de artículos del blog) y al hacer clic en uno, te lleve a otra pantalla nueva que muestre los detalles completos de esa única cosa (el artículo completo para leerlo).
+
+4. ¿Cumplimos con esto?
+¡Sí! 
+- La Entidad Central es el "Artículo" del blog.
+- La relación de pertenencia está en las "Categorías" de la Barra de Navegación (cada artículo tiene su categoría vinculada).
+- La navegación a la ficha se cumple cuando pasas de la lista principal de artículos al renderizador (`blog-render`) que te muestra el contenido JSON expandido de ese artículo específico.

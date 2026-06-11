@@ -41,3 +41,9 @@ export type Article = {
   blocks: EditorJsBlock[];
   comments?: Comment[];
 };
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este archivo define los "tipos" o la estructura de datos que usamos para los artículos mediante TypeScript.
+ * Asegura que todos los artículos tengan los campos correctos (título, contenido, categoría, etc.).
+ * Comparación con Expo: En Expo (si usas TypeScript), tendrías un archivo similar con "interfaces" o "types" para autocompletado y validación de datos. Si usas JavaScript puro, no tendrías este archivo, pero correrías más riesgo de errores.
+ */

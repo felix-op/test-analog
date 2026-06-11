@@ -290,3 +290,9 @@ export class BlogEditorComponent implements OnDestroy {
     }
   }
 }
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este componente es el encargado de crear y editar los artículos del blog usando EditorJS. 
+ * Maneja el estado temporal de lo que el usuario escribe antes de guardarlo.
+ * Comparación con Expo: En Expo, esto sería un componente que contiene múltiples <TextInput> y maneja el estado local con useState() para guardar el título, contenido y categoría antes de enviar un formulario.
+ */

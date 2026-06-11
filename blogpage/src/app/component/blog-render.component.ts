@@ -93,6 +93,17 @@ import { NgClass } from '@angular/common';
           }
         </div>
 
+        <!-- Etiquetas (Tags) -->
+        @if (article().tags && article().tags?.length) {
+          <div class="flex flex-wrap gap-2 pt-4">
+            @for (tag of article().tags; track tag) {
+              <span class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-full transition-colors cursor-pointer">
+                #{{ tag }}
+              </span>
+            }
+          </div>
+        }
+
         <!-- Acciones Inferiores (Likes, Comments, Shares) -->
         <div class="flex items-center gap-6 pt-6 border-t border-slate-100 text-sm font-semibold text-slate-500">
           <button (click)="onLike()" class="flex items-center gap-2 hover:text-red-500 transition-colors group">
@@ -258,3 +269,10 @@ export class BlogRenderComponent {
     });
   }
 }
+
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este componente se encarga exclusivamente de leer los datos JSON de un artículo y dibujarlos (renderizarlos) en la pantalla con su formato correcto (títulos, párrafos, imágenes).
+ * Es la "ficha del elemento" que mencionaba la consigna.
+ * Comparación con Expo: En Expo, esto sería una pantalla de "Detalle" que recibe los datos por parámetros de navegación (route.params) y usa un componente <FlatList> o un `.map()` para iterar sobre los bloques del artículo y mostrar <Text> o <Image> según corresponda.
+ */

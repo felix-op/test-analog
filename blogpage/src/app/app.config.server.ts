@@ -15,3 +15,8 @@ mejorar el SEO/velocidad de carga), no usa solamente app.config.ts, sino que usa
 De esta manera, el servidor tiene todo lo base más las capacidades de renderizado en servidor, 
 mientras que el cliente (el navegador) usa solo lo base.
 */ 
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este archivo es específico de AnalogJS. Configura cómo se comporta la aplicación cuando se renderiza en el servidor (SSR - Server Side Rendering) antes de enviarse al navegador.
+ * Comparación con Expo: Expo tradicionalmente renderiza todo en el cliente (el teléfono), pero si usaras Expo Router para web con SSR, tendrías un archivo de configuración similar para el servidor.
+ */

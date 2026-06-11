@@ -358,3 +358,10 @@ export default class HomePage {
     this.selectedArticle.set(null);
   }
 }
+
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este archivo es la página principal (la pantalla inicial) de nuestra aplicación.
+ * Funciona como el "contenedor" que agrupa la barra de navegación y la lista de artículos.
+ * Comparación con Expo: En Expo, esto sería como tu archivo App.js o tu pantalla "Home" principal (un View principal) que renderiza otros componentes hijos dentro de ella.
+ */

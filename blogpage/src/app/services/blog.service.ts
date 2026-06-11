@@ -408,3 +408,10 @@ export class BlogService {
     ];
   }
 }
+
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este archivo es un "Servicio". Centraliza la lógica para obtener, guardar o buscar datos. 
+ * En una app real, aquí harías las peticiones a la base de datos o API. Por ahora, maneja los datos simulados.
+ * Comparación con Expo: En Expo, crearías un archivo separado (ej. api.js o un custom hook de React) donde pones tus funciones fetch() para mantener separada la lógica de datos de la interfaz visual.
+ */

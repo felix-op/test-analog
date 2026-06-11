@@ -119,3 +119,10 @@ export class BarNavegacionComponent {
     alert('Sistema de Ayuda y Soporte\n\nEste blog de demostración te permite gestionar artículos guardándolos en local storage sin base de datos.\nUtiliza el editor visual para redactar tus posts con imágenes y texto formateado.');
   }
 }
+
+/* 
+ * RESUMEN DEL ARCHIVO:
+ * Este archivo crea la barra de navegación que contiene las categorías.
+ * Su función principal es permitir al usuario filtrar los artículos según los temas relacionados.
+ * Comparación con Expo: En Expo, esto podría ser un componente personalizado de "Tabs" o un <ScrollView horizontal> con botones (TouchableOpacity) que al presionarlos actualizan el estado global para filtrar la lista de artículos mostrada en la pantalla principal.
+ */
