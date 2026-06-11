@@ -1,0 +1,102 @@
+GUIA DE ARQUITECTURA: BLOGPAGE EN ANALOGJS (COMPARATIVA CON REACT + EXPO)
+
+Esta guia explica en un lenguaje sencillo como funciona la logica implementada en nuestro blog de AnalogJS, que es el configurador @Component, y como se compara cada concepto con el mundo de React + Expo para facilitar tu comprension como arquitecto de computacion.
+
+========================================================================
+1. ¿COMO FUNCIONA LA LOGICA DE LA "BLOGPAGE"?
+========================================================================
+
+La logica se divide en tres niveles: la persistencia de datos, la coordinacion de pantallas y la representacion visual:
+
+* Capa de Datos (BlogService): 
+  Actua como nuestra base de datos local. Al iniciar el componente, carga el contenido almacenado en el localStorage del navegador. Si esta vacio, inyecta 5 articulos de ejemplo ("datos semilla"). Tambien maneja las acciones del usuario como agregar comentarios, dar "Me gusta", calcular articulos relacionados y guardar nuevos borradores.
+
+* Coordinador de Vistas (index.page.ts): 
+  Es el "cerebro" o la pantalla principal. Controla que vista se esta mostrando mediante señales (signals):
+  - explorer: Muestra el listado de tarjetas de noticias.
+  - viewer: Abre la ficha detallada de un articulo.
+  - editor: Abre el editor visual (Editor.js) para redactar o modificar un articulo.
+
+* Componentes Visuales Secundarios:
+  - BarNavegacionComponent: Barra lateral que filtra articulos por categoria.
+  - BlogRenderComponent: Lee los bloques JSON de EditorJS y los traduce a HTML visual.
+  - BlogEditorComponent: El formulario para escribir titulos y usar el editor interactivo.
+
+========================================================================
+2. ENTENDIENDO EL @COMPONENT EN ANGULAR VS. REACT + EXPO
+========================================================================
+
+En React/Expo, un componente es simplemente una funcion de JavaScript que retorna JSX (marcado visual). En Angular/AnalogJS, los componentes son clases de TypeScript decoradas con "@Component".
+
+El @Component es un decorador (un configurador). Le dice a Angular: "Esta clase de TypeScript no es una clase cualquiera, es un componente visual y quiero que lo configures con estos parametros":
+
+PROPIEDADES DE @COMPONENT Y SU EQUIVALENCIA EN REACT + EXPO:
+
+* selector: 
+  - Que hace en Angular: Define la etiqueta HTML personalizada con la que llamaremos al componente.
+  - Equivalente en React/Expo: El nombre de la funcion del componente (ej. <BarNavegacion />).
+  - Explicacion simple: Si configuras selector: 'app-bar-navegacion', en tu HTML lo invocarans escribiendo <app-bar-navegacion></app-bar-navegacion>.
+
+* standalone: true:
+  - Que hace en Angular: Indica que el componente es autonomo y no depende de modulos declarativos pesados de Angular.
+  - Equivalente en React/Expo: Todos los componentes en React son "standalone" por defecto.
+  - Explicacion simple: Permite que el componente se pueda importar y usar de forma aislada y directa.
+
+* imports:
+  - Que hace en Angular: Lista los otros componentes, directivas o botones que se van a usar dentro de su HTML.
+  - Equivalente en React/Expo: Las declaraciones "import Componente from './Componente'" al inicio del archivo React.
+  - Explicacion simple: En Angular Standalone, debes declarar explicitamente en "imports" cada componente secundario que quieras usar en tu plantilla HTML.
+
+* template:
+  - Que hace en Angular: Es la estructura HTML de la interfaz del componente.
+  - Equivalente en React/Expo: El bloque "return ( <View> ... </View> )" escrito en JSX.
+  - Explicacion simple: Aqui escribes el HTML de tu pantalla. En lugar de usar elementos moviles como <View> o <Text> (Expo), usas etiquetas web tradicionales (div, header, h1, etc.).
+
+* styles:
+  - Que hace en Angular: Contiene las reglas CSS aplicadas unicamente a este componente.
+  - Equivalente en React/Expo: El objeto creado con StyleSheet.create({ ... }).
+  - Explicacion simple: Angular aisla estos estilos por defecto (encapsulamiento). Lo que escribas en "styles" solo afectara a este componente, exactamente igual que el StyleSheet de Expo que no se filtra a otros componentes.
+
+========================================================================
+3. COMPARATIVA CONCEPTUAL: ANALOGJS VS. REACT + EXPO
+========================================================================
+
+Si vienes de desarrollar aplicaciones en Expo (movil), aqui tienes una traduccion directa de conceptos en lenguaje sencillo:
+
+A. Estado Reactivo: Signals vs. useState
+- En Expo (React): Usas "const [activeView, setActiveView] = useState('explorer')". Cuando llamas a "setActiveView", React re-ejecuta toda la funcion del componente para ver que cambio en el DOM virtual.
+- En AnalogJS (Angular): Usas "activeView = signal('explorer')". Las Signals son valores reactivos inteligentes. Cuando cambia su valor, Angular sabe exactamente que minusculo nodo del HTML real depende de esa señal y lo actualiza directamente, sin re-evaluar todo el componente.
+
+B. Valores Computados: computed() vs. useMemo()
+- En Expo (React): Si tienes una lista y quieres filtrarla, usas "const filtered = useMemo(() => list.filter(...), [list, query])".
+- En AnalogJS: Usas "filteredArticles = computed(() => { ... })". No necesitas declarar dependencias; la señal computada detecta automaticamente que señales leiste en su interior y se recalcula sola cuando alguna de ellas cambia.
+
+C. Comunicacion: Inputs/Outputs vs. Props
+- En Expo (React): Envias datos y funciones callback por props: <Card title={item.title} onPress={() => select(item)} />.
+- En AnalogJS: 
+  * Los datos entrantes se definen con "input()": article = input<Article>() (Equivale a recibir un prop).
+  * Los eventos salientes se definen con "output()": articleSelect = output<Article>(). En el HTML del padre escuchas el evento usando parentesis: (articleSelect)="miFuncion($event)" (Equivale a pasar un callback).
+
+========================================================================
+4. CUMPLIMIENTO DE LAS CONSIGNAS DE LA CATEDRA
+========================================================================
+
+Nuestra implementacion cumple rigurosamente con los requerimientos estructurales solicitados:
+
+A. Entidad Central con Relacion de Pertenencia (1:N)
+- Entidad Central: "Articulo" (Article) en blog.type.ts.
+- Relacion de Pertenencia (1:N): Un Articulo posee muchos Comentarios.
+  * En el tipo Article definimos "comments?: Comment[]". Cada articulo tiene su propio arreglo de comentarios embebidos.
+  * En BlogService, la funcion agregarComentario() localiza el articulo por su ID e inserta un nuevo objeto comentario en su lista.
+  * En BlogRenderComponent, iteramos los comentarios de la entidad correspondiente con "@for (comment of article().comments; track comment.id)".
+
+B. Incorporacion de Relacion Muchos a Muchos (MxN)
+- Relacion MxN: Articulos <-> Etiquetas (Tags).
+  * Un Articulo puede tener multiples etiquetas (ej: ['Clima', 'ASEAN', 'Sostenibilidad']).
+  * Una misma Etiqueta (ej: 'Clima') puede estar asociada a multiples articulos independientes en el sistema.
+- Aplicacion Practica de la Relacion: Esta relacion muchos a muchos se aprovecha para el sistema de recomendacion del blog. Cuando visualizas un articulo en el BlogRenderComponent, el servicio ejecuta el metodo obtenerArticulosRelacionados(). Este algoritmo calcula la coincidencia de etiquetas compartidas (interseccion MxN) y de categorias, ordenandolos para mostrar las mejores sugerencias al lector.
+
+C. Navegacion a la Ficha del Elemento (Detalle)
+- En la vista de exploracion (explorer), cada tarjeta de articulo tiene un evento de clic: (click)="viewArticle(art)".
+- Al hacer clic, la pantalla principal actualiza el estado de la aplicacion seteando la señal selectedArticle.set(article) y cambiando la vista a viewer.
+- El panel de trabajo oculta la cuadricula y renderiza el componente <app-blog-render [article]="selectedArticle()!" />, mostrando de manera detallada todos los atributos del elemento (titulo, autor, imagen de portada grande, bloques redactados y caja de comentarios).
