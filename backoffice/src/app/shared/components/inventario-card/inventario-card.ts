@@ -15,11 +15,11 @@ export class InventarioCardComponent {
 
   getEstadoClass(): string {
     switch (this.card.estado) {
-      case 'disponible':
+      case 'activo':
         return 'estado-disponible';
-      case 'bajo stock':
+      case 'en revisión':
         return 'estado-warning';
-      case 'sin stock':
+      case 'inactivo':
         return 'estado-faltante';
       default:
         return 'estado-neutral';
@@ -28,9 +28,5 @@ export class InventarioCardComponent {
 
   getShellClass(): string {
     return this.getEstadoClass();
-  }
-
-  getProgress(): number {
-    return Math.min(100, Math.round((this.card.cantidadDisponible / this.card.cantidadMaxima) * 100));
   }
 }

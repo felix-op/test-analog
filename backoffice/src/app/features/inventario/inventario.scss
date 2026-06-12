@@ -66,6 +66,53 @@
   flex: 0 0 auto;
 }
 
+.product-form-section {
+  padding: 22px;
+  margin-bottom: 22px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 24px;
+  background: var(--mat-sys-surface);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.06);
+}
+
+.form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.form-header h2 {
+  margin: 0 0 6px 0;
+  color: var(--mat-sys-on-surface);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.form-header p {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.product-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.ingredients-field {
+  grid-column: span 2;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
 .summary-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(160px, 1fr));
@@ -130,5 +177,19 @@
 
   .summary-row {
     grid-template-columns: 1fr;
+  }
+
+  .product-form {
+    grid-template-columns: 1fr;
+  }
+
+  .ingredients-field,
+  .form-actions {
+    grid-column: auto;
+  }
+
+  .form-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
   }
 }

@@ -1,8 +1,8 @@
 <div class="inventario-container">
   <header class="inventario-header">
     <div>
-      <h1>Inventario</h1>
-      <p class="subtitle">Productos disponibles para la venta</p>
+      <h1>Productos</h1>
+      <p class="subtitle">Catálogo de venta y recetas de cafetería</p>
     </div>
   </header>
 
@@ -28,27 +28,81 @@
         </button>
       </div>
 
-      <button mat-flat-button color="primary" type="button" class="add-button">
+      <button mat-flat-button color="primary" type="button" class="add-button" (click)="abrirFormulario()">
         <mat-icon>add</mat-icon>
-        Agregar
+        Agregar producto
       </button>
     </div>
   </section>
 
-  <section class="summary-row" aria-label="Resumen del inventario">
+  <section class="product-form-section" *ngIf="formularioAbierto()">
+    <div class="form-header">
+      <div>
+        <h2>{{ productoEditando() ? 'Editar producto' : 'Agregar producto' }}</h2>
+        <p>Define el producto y su receta. El stock real se gestionará desde ingredientes.</p>
+      </div>
+      <button mat-icon-button type="button" aria-label="Cerrar formulario" (click)="cerrarFormulario()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form class="product-form" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
+      <mat-form-field appearance="outline">
+        <mat-label>Producto</mat-label>
+        <input matInput formControlName="producto" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select formControlName="categoria">
+          <mat-option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option *ngFor="let estado of estados" [value]="estado">{{ estado }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Precio</mat-label>
+        <input matInput type="number" min="1" formControlName="precio" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="ingredients-field">
+        <mat-label>Receta / ingredientes</mat-label>
+        <input matInput formControlName="ingredientes" placeholder="Leche entera, Granos de café arábica" />
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-button type="button" (click)="cerrarFormulario()">Cancelar</button>
+        <button mat-flat-button color="primary" type="submit">
+          {{ productoEditando() ? 'Guardar cambios' : 'Crear producto' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="summary-row" aria-label="Resumen de productos">
     <div class="summary-item">
-      <strong>{{ inventario.length }}</strong>
+      <strong>{{ inventario().length }}</strong>
       <span>Productos</span>
     </div>
     <div class="summary-item danger">
-      <strong>{{ productosBajoStock() }}</strong>
-      <span>Bajo stock</span>
+      <strong>{{ productosEnRevision() }}</strong>
+      <span>En revisión</span>
     </div>
     <div class="summary-item danger">
-      <strong>{{ productosSinStock() }}</strong>
-      <span>Sin stock</span>
+      <strong>{{ productosInactivos() }}</strong>
+      <span>Inactivos</span>
     </div>
   </section>
 
-  <app-inventario-table [items]="inventarioFiltrado()"></app-inventario-table>
+  <app-inventario-table
+    [items]="inventarioFiltrado()"
+    (editar)="editarProducto($event)"
+    (eliminar)="eliminarProducto($event)"
+  ></app-inventario-table>
 </div>

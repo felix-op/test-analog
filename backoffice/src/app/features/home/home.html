@@ -13,11 +13,11 @@
 
   <section class="dashboard-section">
     <div class="section-header">
-      <h2>Inventario crítico</h2>
-      <p>Productos con bajo stock o sin stock</p>
+      <h2>Productos a revisar</h2>
+      <p>Productos inactivos o pendientes de revisión</p>
     </div>
     <div class="tarjetas-flex">
-      <app-inventario-card *ngFor="let item of inventario" [card]="item"></app-inventario-card>
+      <app-inventario-card *ngFor="let item of inventario()" [card]="item"></app-inventario-card>
     </div>
   </section>
 

@@ -9,10 +9,7 @@
       </div>
 
       <div class="progress-block">
-        <div class="progress-value">{{ card.cantidadDisponible }} / {{ card.cantidadMaxima }}</div>
-        <div class="progress-bar">
-          <span class="progress-fill" [ngClass]="getEstadoClass()" [style.width.%]="getProgress()"></span>
-        </div>
+        <div class="progress-value">{{ card.categoria }}</div>
       </div>
     </mat-card-content>
   </mat-card>

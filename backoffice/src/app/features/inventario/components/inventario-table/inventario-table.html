@@ -6,8 +6,7 @@
         <th>Producto</th>
         <th>Categoría</th>
         <th>Precio</th>
-        <th>Disponibilidad</th>
-        <th>Ingredientes</th>
+        <th>Receta</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -17,7 +16,7 @@
         <td>
           <div class="estado-cell">
             <span class="estado-dot" [ngClass]="getEstadoClass(item)"></span>
-            <strong>{{ getPorcentaje(item) }}%</strong>
+            <strong>{{ item.estado }}</strong>
           </div>
         </td>
         <td>
@@ -28,21 +27,30 @@
         </td>
         <td>{{ item.categoria }}</td>
         <td class="price-cell">{{ item.precio | currency:'ARS':'symbol-narrow':'1.0-0' }}</td>
-        <td>
-          <div class="stock-cell">
-            <span>{{ item.cantidadDisponible }} de {{ item.cantidadMaxima }} {{ item.unidad }}</span>
-            <div class="stock-bar">
-              <span
-                class="stock-fill"
-                [ngClass]="getEstadoClass(item)"
-                [style.width.%]="getPorcentaje(item)"
-              ></span>
-            </div>
-          </div>
-        </td>
         <td class="ingredients-cell">{{ getIngredientesPreview(item) }}</td>
         <td>
-          <button mat-button color="primary" type="button">Ver detalles</button>
+          <div class="actions-cell">
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              aria-label="Editar producto"
+              matTooltip="Editar producto"
+              (click)="editarProducto(item)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              aria-label="Eliminar producto"
+              matTooltip="Eliminar producto"
+              (click)="eliminarProducto(item.id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </td>
       </tr>
     </tbody>

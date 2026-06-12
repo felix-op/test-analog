@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResumenCardComponent } from '@components/resumen-card/resumen-card';
 import { IngredienteCardComponent } from '@components/ingrediente-card/ingrediente-card';
@@ -81,11 +81,22 @@ export class HomePage {
     },
   ];
 
-  inventario: InventarioCard[] = this.inventarioService.obtenerProductosCriticos().map((producto) => ({
-    id: producto.id,
-    nombre: producto.producto,
-    cantidadDisponible: producto.cantidadDisponible,
-    cantidadMaxima: producto.cantidadMaxima,
-    estado: producto.estado,
-  }));
+  inventario = computed<InventarioCard[]>(() =>
+    this.inventarioService
+      .productos()
+      .filter((producto) => producto.estado === 'inactivo' || producto.estado === 'en revisión')
+      .sort((a, b) => this.getPrioridadEstado(b.estado) - this.getPrioridadEstado(a.estado))
+      .map((producto) => ({
+        id: producto.id,
+        nombre: producto.producto,
+        categoria: producto.categoria,
+        estado: producto.estado,
+      })),
+  );
+
+  private getPrioridadEstado(estado: InventarioCard['estado']): number {
+    if (estado === 'inactivo') return 2;
+    if (estado === 'en revisión') return 1;
+    return 0;
+  }
 }

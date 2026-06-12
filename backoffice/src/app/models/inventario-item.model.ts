@@ -1,4 +1,4 @@
-export type InventarioEstado = 'disponible' | 'bajo stock' | 'sin stock';
+export type InventarioEstado = 'activo' | 'en revisión' | 'inactivo';
 
 export interface IngredienteProducto {
   ingredienteId: string;
@@ -13,8 +13,5 @@ export interface InventarioItem {
   producto: string;
   categoria: string;
   precio: number;
-  cantidadDisponible: number;
-  cantidadMaxima: number;
-  unidad: string;
   ingredientes: IngredienteProducto[];
 }
