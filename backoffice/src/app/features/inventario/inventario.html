@@ -1,0 +1,54 @@
+<div class="inventario-container">
+  <header class="inventario-header">
+    <div>
+      <h1>Inventario</h1>
+      <p class="subtitle">Productos disponibles para la venta</p>
+    </div>
+  </header>
+
+  <section class="toolbar-section">
+    <mat-form-field class="search-field" appearance="outline">
+      <mat-label>Buscar</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="search" [value]="busqueda()" (input)="setBusqueda($event)" />
+    </mat-form-field>
+
+    <div class="filters-actions-row">
+      <div class="filters-row" aria-label="Filtros de inventario">
+        <button
+          *ngFor="let filtro of filtros"
+          mat-stroked-button
+          type="button"
+          class="filter-button"
+          [class.active-filter]="filtroActivo() === filtro.id"
+          (click)="setFiltro(filtro.id)"
+        >
+          <mat-icon>{{ filtro.icon }}</mat-icon>
+          {{ filtro.label }}
+        </button>
+      </div>
+
+      <button mat-flat-button color="primary" type="button" class="add-button">
+        <mat-icon>add</mat-icon>
+        Agregar
+      </button>
+    </div>
+  </section>
+
+  <section class="summary-row" aria-label="Resumen del inventario">
+    <div class="summary-item">
+      <strong>{{ inventario.length }}</strong>
+      <span>Productos</span>
+    </div>
+    <div class="summary-item danger">
+      <strong>{{ productosBajoStock() }}</strong>
+      <span>Bajo stock</span>
+    </div>
+    <div class="summary-item danger">
+      <strong>{{ productosSinStock() }}</strong>
+      <span>Sin stock</span>
+    </div>
+  </section>
+
+  <app-inventario-table [items]="inventarioFiltrado()"></app-inventario-table>
+</div>
