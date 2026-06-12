@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResumenCardComponent } from '@components/resumen-card/resumen-card';
 import { IngredienteCardComponent } from '@components/ingrediente-card/ingrediente-card';
 import { InventarioCardComponent } from '@components/inventario-card/inventario-card';
+import { InventarioService } from '@core/services/inventario.service';
 import type { ResumenCard } from '@models/resumen-card.model';
 import type { IngredienteCard } from '@models/ingrediente-card.model';
 import type { InventarioCard } from '@models/inventario-card.model';
@@ -15,6 +16,8 @@ import type { InventarioCard } from '@models/inventario-card.model';
   styleUrl: './home.scss',
 })
 export class HomePage {
+  private readonly inventarioService = inject(InventarioService);
+
   tarjetas: ResumenCard[] = [
     {
       id: 'ventas',
@@ -78,27 +81,11 @@ export class HomePage {
     },
   ];
 
-  inventario: InventarioCard[] = [
-    {
-      id: 'cafe-java',
-      nombre: 'Café Java',
-      cantidadDisponible: 25,
-      cantidadMaxima: 300,
-      estado: 'faltante',
-    },
-    {
-      id: 'harina',
-      nombre: 'Harina',
-      cantidadDisponible: 79,
-      cantidadMaxima: 100,
-      estado: 'limite compra',
-    },
-    {
-      id: 'salsa',
-      nombre: 'Salsa',
-      cantidadDisponible: 290,
-      cantidadMaxima: 300,
-      estado: 'disponible',
-    },
-  ];
+  inventario: InventarioCard[] = this.inventarioService.obtenerProductosCriticos().map((producto) => ({
+    id: producto.id,
+    nombre: producto.producto,
+    cantidadDisponible: producto.cantidadDisponible,
+    cantidadMaxima: producto.cantidadMaxima,
+    estado: producto.estado,
+  }));
 }

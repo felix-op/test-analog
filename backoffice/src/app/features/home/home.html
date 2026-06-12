@@ -13,8 +13,8 @@
 
   <section class="dashboard-section">
     <div class="section-header">
-      <h2>Inventario</h2>
-      <p>Estado actual del stock</p>
+      <h2>Inventario crítico</h2>
+      <p>Productos con bajo stock o sin stock</p>
     </div>
     <div class="tarjetas-flex">
       <app-inventario-card *ngFor="let item of inventario" [card]="item"></app-inventario-card>

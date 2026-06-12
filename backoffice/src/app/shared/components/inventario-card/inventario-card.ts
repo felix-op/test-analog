@@ -15,13 +15,12 @@ export class InventarioCardComponent {
 
   getEstadoClass(): string {
     switch (this.card.estado) {
-      case 'faltante':
-        return 'estado-faltante';
-      case 'ingredientes faltantes':
-      case 'limite compra':
-        return 'estado-warning';
       case 'disponible':
         return 'estado-disponible';
+      case 'bajo stock':
+        return 'estado-warning';
+      case 'sin stock':
+        return 'estado-faltante';
       default:
         return 'estado-neutral';
     }
@@ -32,7 +31,6 @@ export class InventarioCardComponent {
   }
 
   getProgress(): number {
-    const max = 300;
-    return Math.min(100, Math.round((this.card.cantidadDisponible / max) * 100));
+    return Math.min(100, Math.round((this.card.cantidadDisponible / this.card.cantidadMaxima) * 100));
   }
 }

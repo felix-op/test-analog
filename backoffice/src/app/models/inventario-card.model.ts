@@ -3,5 +3,5 @@ export interface InventarioCard {
   nombre: string;
   cantidadDisponible: number;
   cantidadMaxima: number;
-  estado: 'faltante' | 'ingredientes faltantes' | 'limite compra' | 'disponible';
+  estado: 'disponible' | 'bajo stock' | 'sin stock';
 }
