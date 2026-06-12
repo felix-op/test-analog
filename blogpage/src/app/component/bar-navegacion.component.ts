@@ -9,10 +9,10 @@ import { NgClass } from '@angular/common';
     <div class="h-full flex flex-col justify-between py-6 px-4 bg-slate-50 border-r border-slate-200">
       
       <!-- Sección Superior: Logo y Navegación Principal -->
-      <div class="space-y-8">
+      <div class="space-y-8 flex flex-col min-h-0">
         
         <!-- Logo -->
-        <div class="flex items-center gap-3 px-2">
+        <div class="flex items-center gap-3 px-2 shrink-0">
           <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
             <!-- Icono Headway -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -23,7 +23,7 @@ import { NgClass } from '@angular/common';
         </div>
 
         <!-- Navegación Principal -->
-        <nav class="space-y-1.5">
+        <nav class="space-y-1.5 shrink-0">
           <!-- Botón Dashboard / Inicio -->
           <button 
             (click)="selectView('explorer')"
@@ -53,12 +53,14 @@ import { NgClass } from '@angular/common';
           </button>
         </nav>
 
-        <hr class="border-slate-200 my-4" />
+        <hr class="border-slate-200 my-4 shrink-0" />
 
-        <!-- Categorías -->
-        <div class="space-y-3">
-          <span class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider block">Categorías</span>
-          <div class="space-y-1">
+        <!-- Categorías (dinámicas desde la API) -->
+        <div class="flex flex-col min-h-0 flex-1">
+          <span class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2 shrink-0">Categorías</span>
+          
+          <!-- Lista scrollable de categorías -->
+          <div class="overflow-y-auto flex-1 space-y-1 pr-1" style="max-height: 280px;">
             @for (cat of categories(); track cat) {
               <button 
                 (click)="selectCategory(cat)"
@@ -70,13 +72,33 @@ import { NgClass } from '@angular/common';
                 {{ cat }}
               </button>
             }
+
+            <!-- Indicador de carga -->
+            @if (loadingCategories()) {
+              <div class="flex items-center justify-center py-3">
+                <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            }
           </div>
+
+          <!-- Botón "Cargar más categorías" con flecha -->
+          @if (hasMoreCategories() && !loadingCategories()) {
+            <button 
+              (click)="loadMoreCategories()"
+              class="w-full flex items-center justify-center gap-2 mt-2 py-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 shrink-0 group">
+              <span>Más categorías</span>
+              <!-- Flecha abajo -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+          }
         </div>
 
       </div>
 
       <!-- Sección Inferior: Soporte e Información -->
-      <div class="space-y-1">
+      <div class="space-y-1 shrink-0">
         <button 
           (click)="abrirAyuda()"
           class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 text-left text-sm group">
@@ -98,10 +120,13 @@ export class BarNavegacionComponent {
   activeCategory = input<string | null>(null);
   activeView = input<'explorer' | 'editor' | 'viewer'>('explorer');
   categories = input<string[]>([]);
+  hasMoreCategories = input<boolean>(true);
+  loadingCategories = input<boolean>(false);
 
   // Outputs usando output() API
   categorySelected = output<string | null>();
   viewSelected = output<'explorer' | 'editor' | 'viewer'>();
+  loadMoreCategoriesRequested = output<void>();
 
   selectCategory(category: string) {
     this.categorySelected.emit(category);
@@ -115,8 +140,12 @@ export class BarNavegacionComponent {
     this.viewSelected.emit(view);
   }
 
+  loadMoreCategories() {
+    this.loadMoreCategoriesRequested.emit();
+  }
+
   abrirAyuda() {
-    alert('Sistema de Ayuda y Soporte\n\nEste blog de demostración te permite gestionar artículos guardándolos en local storage sin base de datos.\nUtiliza el editor visual para redactar tus posts con imágenes y texto formateado.');
+    alert('Sistema de Ayuda y Soporte\n\nEste blog de demostración te permite explorar artículos de DEV.to filtrados por categorías.\nUtiliza las categorías de la barra lateral para filtrar el contenido.');
   }
 }
 

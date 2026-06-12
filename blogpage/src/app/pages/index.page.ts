@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, ViewChild, ElementRef } from '@angular/core';
 import { BarNavegacionComponent } from '../component/bar-navegacion.component';
 import { BlogRenderComponent } from '../component/blog-render.component';
 import { BlogEditorComponent } from '../component/blog-editor.component';
@@ -17,12 +17,15 @@ import { Article } from '../types/blog.type';
         class="w-64 shrink-0 h-screen sticky top-0"
         [activeCategory]="selectedCategory()"
         [activeView]="activeView()"
-        [categories]="blogService.categories"
+        [categories]="blogService.categories()"
+        [hasMoreCategories]="blogService.hasMoreCategories()"
+        [loadingCategories]="blogService.loadingCategories()"
         (categorySelected)="onCategorySelected($event)"
-        (viewSelected)="onViewSelected($event)" />
+        (viewSelected)="onViewSelected($event)"
+        (loadMoreCategoriesRequested)="onLoadMoreCategories()" />
 
       <!-- Panel de Contenido Principal (Scrollable) -->
-      <div class="flex-1 flex flex-col h-screen overflow-y-auto">
+      <div #contentPanel class="flex-1 flex flex-col h-screen overflow-y-auto">
         
         <!-- Barra de Encabezado Superior -->
         <header class="sticky top-0 bg-white border-b border-slate-200/80 px-6 py-4 flex items-center justify-between z-10 shadow-sm/5">
@@ -183,6 +186,34 @@ import { Article } from '../types/blog.type';
                   }
                 </div>
 
+                <!-- Botón de Cargar Más -->
+                @if (blogService.hasMore()) {
+                  <div class="flex justify-center pt-8">
+                    <button 
+                      (click)="blogService.cargarMasArticulos()"
+                      [disabled]="blogService.loading()"
+                      class="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 hover:border-slate-350 rounded-xl text-slate-700 font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                      
+                      @if (blogService.loading()) {
+                        <svg class="animate-spin h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Cargando artículos...
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-500">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                        Cargar más artículos
+                      }
+                    </button>
+                  </div>
+                } @else {
+                  <div class="text-center pt-8 text-xs font-semibold text-slate-400 tracking-wide">
+                    Has llegado al final. Todos los artículos cargados de la API.
+                  </div>
+                }
+
               }
             </div>
 
@@ -227,6 +258,9 @@ import { Article } from '../types/blog.type';
 export default class HomePage {
   blogService = inject(BlogService);
 
+  // Referencia al panel scrollable para poder hacer scroll-to-top
+  @ViewChild('contentPanel') contentPanel!: ElementRef<HTMLDivElement>;
+
   // Estados reactivos (Signals)
   activeView = signal<'explorer' | 'editor' | 'viewer'>('explorer');
   selectedCategory = signal<string | null>(null);
@@ -234,14 +268,10 @@ export default class HomePage {
   selectedArticle = signal<Article | null>(null);
 
   // Listado filtrado reactivo
+  // El filtro por categoría ahora se hace server-side vía filtrarPorTag()
+  // Acá solo queda el filtro del buscador local
   filteredArticles = computed(() => {
     let list = this.blogService.articles();
-
-    // Filtro de categoría
-    const category = this.selectedCategory();
-    if (category) {
-      list = list.filter(a => a.category.toLowerCase() === category.toLowerCase());
-    }
 
     // Filtro de buscador (Título o Etiquetas)
     const query = this.searchQuery().toLowerCase().trim();
@@ -266,6 +296,13 @@ export default class HomePage {
     this.selectedCategory.set(category);
     this.searchQuery.set(''); // Resetear búsqueda cuando se hace clic en una categoría
     this.activeView.set('explorer');
+    // Filtrar artículos desde la API por el tag seleccionado
+    this.blogService.filtrarPorTag(category);
+    this.scrollToTop();
+  }
+
+  onLoadMoreCategories() {
+    this.blogService.cargarMasCategorias();
   }
 
   onViewSelected(view: 'explorer' | 'editor' | 'viewer') {
@@ -287,16 +324,34 @@ export default class HomePage {
   resetFilters() {
     this.selectedCategory.set(null);
     this.searchQuery.set('');
+    this.blogService.filtrarPorTag(null);
   }
 
-  viewArticle(article: Article) {
-    // Para ver el artículo con los datos más actualizados del servicio
-    const freshArticle = this.blogService.obtenerArticuloPorId(article.id);
-    this.selectedArticle.set(freshArticle || article);
+  // Scroll al inicio del panel de contenido
+  private scrollToTop() {
+    if (this.contentPanel?.nativeElement) {
+      this.contentPanel.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  async viewArticle(article: Article) {
+    // Mostramos inmediatamente los datos disponibles (título, autor, portada)
+    this.selectedArticle.set(article);
     this.activeView.set('viewer');
-    // Scroll al inicio del panel
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Scroll al inicio del panel de contenido
+    this.scrollToTop();
+
+    try {
+      // Cargamos el cuerpo del post (bloques y comentarios completos) de forma asíncrona
+      const detailed = await this.blogService.obtenerDetalleArticulo(article.id);
+      
+      // Actualizamos la vista solo si el usuario sigue viendo el mismo artículo
+      if (this.selectedArticle()?.id === article.id) {
+        this.selectedArticle.set(detailed);
+      }
+    } catch (e) {
+      console.error('Error al cargar detalle del artículo:', e);
     }
   }
 

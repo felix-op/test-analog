@@ -5,106 +5,207 @@ import { Article, Comment } from '../types/blog.type';
   providedIn: 'root',
 })
 export class BlogService {
-  private readonly STORAGE_KEY = 'blog_articles';
-  
   private articlesSignal = signal<Article[]>([]);
   articles = this.articlesSignal.asReadonly();
 
-  // Lista estática de categorías
-  readonly categories = [
-    'Nacional',
-    'Política',
-    'Negocios',
-    'Tecnología',
-    'Deportes',
-    'Estilo de vida',
-    'Viajes'
-  ];
+  // Caché separada de detalles completos (no modifica el listado principal)
+  private detailCache = new Map<string, Article>();
+
+  // Estados de paginación reactivos (Signals)
+  private currentPageSignal = signal<number>(1);
+  currentPage = this.currentPageSignal.asReadonly();
+
+  private hasMoreSignal = signal<boolean>(true);
+  hasMore = this.hasMoreSignal.asReadonly();
+
+  private loadingSignal = signal<boolean>(false);
+  loading = this.loadingSignal.asReadonly();
+
+  // ─── Categorías / Tags dinámicos desde la API ───
+  private categoriesSignal = signal<string[]>([]);
+  categories = this.categoriesSignal.asReadonly();
+
+  private categoriesPageSignal = signal<number>(1);
+  categoriesPage = this.categoriesPageSignal.asReadonly();
+
+  private hasMoreCategoriesSignal = signal<boolean>(true);
+  hasMoreCategories = this.hasMoreCategoriesSignal.asReadonly();
+
+  private loadingCategoriesSignal = signal<boolean>(false);
+  loadingCategories = this.loadingCategoriesSignal.asReadonly();
+
+  // Tag activo para filtrar artículos (null = sin filtro)
+  private activeTagSignal = signal<string | null>(null);
+  activeTag = this.activeTagSignal.asReadonly();
 
   constructor() {
-    this.cargarArticulos();
+    this.cargarArticulos(1);
+    this.cargarCategorias(1);
   }
 
-  private cargarArticulos() {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        try {
-          this.articlesSignal.set(JSON.parse(stored));
-          return;
-        } catch (e) {
-          console.error('Error al parsear artículos guardados:', e);
+  // ─── Carga de categorías (tags) desde la API ───
+  cargarCategorias(page: number = 1) {
+    if (typeof window === 'undefined') return;
+
+    this.loadingCategoriesSignal.set(true);
+
+    fetch(`/api/tags?page=${page}&per_page=10`)
+      .then(res => res.json())
+      .then((tags: string[]) => {
+        if (Array.isArray(tags)) {
+          if (tags.length < 10) {
+            this.hasMoreCategoriesSignal.set(false);
+          } else {
+            this.hasMoreCategoriesSignal.set(true);
+          }
+
+          if (page === 1) {
+            this.categoriesSignal.set(tags);
+          } else {
+            this.categoriesSignal.update(current => [...current, ...tags]);
+          }
+
+          this.categoriesPageSignal.set(page);
         }
-      }
-      // Si no hay artículos, inicializar con datos semilla (mock)
-      const mockArticles = this.obtenerDatosSemilla();
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(mockArticles));
-      this.articlesSignal.set(mockArticles);
-    }
+        this.loadingCategoriesSignal.set(false);
+      })
+      .catch(err => {
+        console.error('Error al cargar categorías de la API:', err);
+        this.loadingCategoriesSignal.set(false);
+      });
   }
 
-  private guardarArticulos(articulos: Article[]) {
-    this.articlesSignal.set(articulos);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(articulos));
-    }
+  // Carga las siguientes 10 categorías
+  cargarMasCategorias() {
+    if (this.loadingCategoriesSignal() || !this.hasMoreCategoriesSignal()) return;
+    const nextPage = this.categoriesPageSignal() + 1;
+    this.cargarCategorias(nextPage);
   }
 
+  // Activa un filtro por tag y recarga artículos desde la API filtrados
+  filtrarPorTag(tag: string | null) {
+    this.activeTagSignal.set(tag);
+    this.currentPageSignal.set(1);
+    this.hasMoreSignal.set(true);
+    this.articlesSignal.set([]);
+    this.cargarArticulos(1, tag);
+  }
+
+  // Carga artículos desde la API de Nitro (10 por página, con filtro opcional por tag)
+  cargarArticulos(page: number = 1, tag?: string | null) {
+    if (typeof window === 'undefined') return;
+
+    this.loadingSignal.set(true);
+
+    // Usamos el tag activo si no se pasa explícitamente
+    const activeTag = tag !== undefined ? tag : this.activeTagSignal();
+    let url = `/api/articles?page=${page}&per_page=10`;
+    if (activeTag) {
+      url += `&tag=${encodeURIComponent(activeTag.toLowerCase())}`;
+    }
+
+    fetch(url)
+      .then(res => res.json())
+      .then((remoteArticles: Article[]) => {
+        if (Array.isArray(remoteArticles)) {
+          // Si traemos menos de 10 elementos, significa que no hay más artículos en el servidor
+          if (remoteArticles.length < 10) {
+            this.hasMoreSignal.set(false);
+          } else {
+            this.hasMoreSignal.set(true);
+          }
+
+          if (page === 1) {
+            this.articlesSignal.set(remoteArticles);
+          } else {
+            this.articlesSignal.update(current => [...current, ...remoteArticles]);
+          }
+
+          this.currentPageSignal.set(page);
+        }
+        this.loadingSignal.set(false);
+      })
+      .catch(err => {
+        console.error('Error al cargar artículos de la API:', err);
+        this.loadingSignal.set(false);
+      });
+  }
+
+  // Carga la siguiente página de artículos (respetando el filtro activo)
+  cargarMasArticulos() {
+    if (this.loadingSignal() || !this.hasMoreSignal()) return;
+    const nextPage = this.currentPageSignal() + 1;
+    this.cargarArticulos(nextPage);
+  }
+
+  // Retorna el artículo que está en la señal (útil para carga rápida instantánea)
   obtenerArticuloPorId(id: string): Article | undefined {
     return this.articlesSignal().find(a => a.id === id);
   }
 
-  guardarArticulo(articulo: Article) {
-    const articulos = this.articlesSignal();
-    const index = articulos.findIndex(a => a.id === articulo.id);
-    let nuevosArticulos: Article[];
-
-    if (index !== -1) {
-      // Editar existente
-      nuevosArticulos = [...articulos];
-      // Preservar likes, comments y shares si no vienen definidos
-      const existente = articulos[index];
-      nuevosArticulos[index] = {
-        ...existente,
-        ...articulo,
-        likes: articulo.likes ?? existente.likes,
-        commentsCount: articulo.comments?.length ?? existente.commentsCount,
-        shares: articulo.shares ?? existente.shares,
-        comments: articulo.comments ?? existente.comments
-      };
-    } else {
-      // Crear nuevo
-      nuevosArticulos = [articulo, ...articulos];
+  // Obtiene los detalles completos (bloques y comentarios) de la API de forma asíncrona
+  // Usa una caché separada para no modificar el listado principal y evitar re-renders
+  async obtenerDetalleArticulo(id: string): Promise<Article> {
+    // Si ya tenemos el detalle cacheado, lo devolvemos al instante
+    const cached = this.detailCache.get(id);
+    if (cached) {
+      return cached;
     }
 
-    this.guardarArticulos(nuevosArticulos);
+    const response = await fetch(`/api/articles/${id}`);
+    if (!response.ok) {
+      throw new Error(`No se pudo cargar el detalle para el artículo con ID: ${id}`);
+    }
+    const freshArticle: Article = await response.json();
+
+    // Guardamos en la caché separada (NO tocamos articlesSignal)
+    this.detailCache.set(id, freshArticle);
+
+    return freshArticle;
   }
 
+  // Guarda un artículo creado/editado en memoria (estado de sesión)
+  guardarArticulo(articulo: Article) {
+    const current = this.articlesSignal();
+    const index = current.findIndex(a => a.id === articulo.id);
+    if (index !== -1) {
+      const updated = [...current];
+      updated[index] = { ...updated[index], ...articulo };
+      this.articlesSignal.set(updated);
+    } else {
+      this.articlesSignal.update(currentList => [articulo, ...currentList]);
+    }
+  }
+
+  // Oculta/Elimina un artículo de la vista en memoria
   eliminarArticulo(id: string) {
-    const filtrados = this.articlesSignal().filter(a => a.id !== id);
-    this.guardarArticulos(filtrados);
+    const filtradosMemoria = this.articlesSignal().filter(a => a.id !== id);
+    this.articlesSignal.set(filtradosMemoria);
   }
 
+  // Incrementa el me gusta reactivamente en memoria para la sesión actual
   darMeGusta(id: string) {
     const actualizados = this.articlesSignal().map(articulo => {
       if (articulo.id === id) {
-        return { ...articulo, likes: articulo.likes + 1 };
+        return { ...articulo, likes: (articulo.likes || 0) + 1 };
       }
       return articulo;
     });
-    this.guardarArticulos(actualizados);
+    this.articlesSignal.set(actualizados);
   }
 
+  // Incrementa los compartidos reactivamente en memoria
   compartirArticulo(id: string) {
     const actualizados = this.articlesSignal().map(articulo => {
       if (articulo.id === id) {
-        return { ...articulo, shares: articulo.shares + 1 };
+        return { ...articulo, shares: (articulo.shares || 0) + 1 };
       }
       return articulo;
     });
-    this.guardarArticulos(actualizados);
+    this.articlesSignal.set(actualizados);
   }
 
+  // Agrega un comentario al artículo correspondiente en la sesión actual
   agregarComentario(articuloId: string, autor: string, texto: string) {
     const actualizados = this.articlesSignal().map(articulo => {
       if (articulo.id === articuloId) {
@@ -129,14 +230,15 @@ export class BlogService {
       }
       return articulo;
     });
-    this.guardarArticulos(actualizados);
+    
+    this.articlesSignal.set(actualizados);
   }
 
+  // Recomendador de artículos relacionados por similitud de etiquetas/categorías
   obtenerArticulosRelacionados(articulo: Article, limite = 3): Article[] {
     return this.articlesSignal()
-      .filter(a => a.id !== articulo.id) // Excluir el artículo actual
+      .filter(a => a.id !== articulo.id)
       .map(a => {
-        // Calcular coincidencia
         let coincidencia = 0;
         if (a.category === articulo.category) coincidencia += 5;
         if (a.tags && articulo.tags) {
@@ -150,268 +252,4 @@ export class BlogService {
       .map(item => item.articulo)
       .slice(0, limite);
   }
-
-  private obtenerDatosSemilla(): Article[] {
-    return [
-      {
-        id: '1',
-        title: 'Indonesia será sede de la Cumbre del Clima de la ASEAN 2025',
-        category: 'Política',
-        tags: ['ASEAN', 'Clima', 'Sostenibilidad', 'Política'],
-        coverImage: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=1000&auto=format&fit=crop&q=80',
-        date: '24 de Junio de 2025',
-        author: {
-          name: 'Rina Wulandari',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rina'
-        },
-        likes: 128,
-        commentsCount: 2,
-        shares: 960,
-        blocks: [
-          {
-            type: 'header',
-            data: {
-              text: 'Yakarta, Indonesia –',
-              level: 2
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'Indonesia ha sido seleccionada oficialmente como el país anfitrión para la Cumbre del Clima de la ASEAN 2025, marcando un esfuerzo diplomático e internacional histórico. Esta será la primera vez que una nación del sudeste asiático lidere la cumbre con una agenda centrada enteramente en energías verdes y sostenibilidad.'
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'El anuncio fue realizado durante la Reunión Ministerial de la ASEAN en Kuala Lumpur el pasado fin de semana. La propuesta de Indonesia destacó por su ambicioso compromiso con las energías renovables, los programas de resiliencia climática y el desarrollo urbano sostenible.'
-            }
-          },
-          {
-            type: 'header',
-            data: {
-              text: 'Un Enfoque Regional en la Acción Climática',
-              level: 3
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'La cumbre, programada para noviembre de 2025, reunirá a líderes y ministros de medio ambiente de las 10 naciones miembros de la ASEAN, junto con observadores invitados de la Unión Europea, Japón y Australia. Los temas de discusión clave incluirán la transición hacia energías limpias, el financiamiento para el desarrollo verde y la reducción del riesgo de desastres.'
-            }
-          },
-          {
-            type: 'list',
-            data: {
-              style: 'unordered',
-              items: [
-                'Hoja de ruta para la transición de energía renovable en el sudeste asiático.',
-                'Iniciativas de financiamiento climático transfronterizo.',
-                'Sistemas comunitarios de alerta temprana ante desastres.'
-              ]
-            }
-          },
-          {
-            type: 'image',
-            data: {
-              file: {
-                url: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&auto=format&fit=crop&q=60'
-              },
-              caption: 'Parque de aerogeneradores para la generación de energía limpia en la región.',
-              withBorder: false,
-              withBackground: false,
-              stretched: false
-            }
-          }
-        ],
-        comments: [
-          {
-            id: 'c1',
-            author: 'Juan Pérez',
-            avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Juan',
-            text: 'Excelente iniciativa. Indonesia tiene un potencial enorme para liderar la transición energética en el sudeste asiático.',
-            date: '25 de Junio de 2025'
-          },
-          {
-            id: 'c2',
-            author: 'Maria Gomez',
-            avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Maria',
-            text: 'Esperemos que los acuerdos se traduzcan en políticas reales y no solo en discursos diplomáticos.',
-            date: '26 de Junio de 2025'
-          }
-        ]
-      },
-      {
-        id: '2',
-        title: 'Políticas de Energía Renovable: ASEAN debate la transición',
-        category: 'Política',
-        tags: ['Política', 'Energía', 'Clima'],
-        coverImage: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1000&auto=format&fit=crop&q=80',
-        date: '28 de Junio de 2025',
-        author: {
-          name: 'Budi Santoso',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Budi'
-        },
-        likes: 54,
-        commentsCount: 1,
-        shares: 42,
-        blocks: [
-          {
-            type: 'header',
-            data: {
-              text: 'Estrategias de Descarbonización Regional',
-              level: 2
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'Los ministros de energía de la ASEAN debatieron ayer las nuevas directrices para acelerar la descarbonización. El plan incluye un subsidio conjunto para paneles solares y proyectos eólicos marinos en zonas costeras.'
-            }
-          }
-        ],
-        comments: [
-          {
-            id: 'c3',
-            author: 'Carlos Ruiz',
-            avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Carlos',
-            text: 'Muy necesario. La energía solar es clave en esta parte del mundo.',
-            date: '29 de Junio de 2025'
-          }
-        ]
-      },
-      {
-        id: '3',
-        title: 'Yakarta implementará transporte verde para mitigar la polución',
-        category: 'Tecnología',
-        tags: ['Tecnología', 'Transporte', 'Clima', 'Urbanismo'],
-        coverImage: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1000&auto=format&fit=crop&q=80',
-        date: '02 de Julio de 2025',
-        author: {
-          name: 'Ahmad Hidayat',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad'
-        },
-        likes: 92,
-        commentsCount: 0,
-        shares: 112,
-        blocks: [
-          {
-            type: 'header',
-            data: {
-              text: 'Electrificación Masiva del Transporte Público',
-              level: 2
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'El gobierno de la ciudad ha anunciado la compra de 500 autobuses eléctricos nuevos y la expansión de ciclovías protegidas. Este proyecto busca reducir en un 30% las emisiones contaminantes en el centro urbano para finales de 2026.'
-            }
-          }
-        ]
-      },
-      {
-        id: '4',
-        title: 'Startups locales se unen a la agenda de innovación verde',
-        category: 'Negocios',
-        tags: ['Negocios', 'Startups', 'Innovación'],
-        coverImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1000&auto=format&fit=crop&q=80',
-        date: '05 de Julio de 2025',
-        author: {
-          name: 'Siti Aminah',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Siti'
-        },
-        likes: 73,
-        commentsCount: 0,
-        shares: 15,
-        blocks: [
-          {
-            type: 'header',
-            data: {
-              text: 'El auge de las CleanTechs',
-              level: 2
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'Las nuevas empresas tecnológicas dedicadas a la sostenibilidad están atrayendo inversiones récord. Desde bioplásticos hechos de algas hasta software de optimización energética para edificios industriales, el sector corporativo apuesta por la economía circular.'
-            }
-          }
-        ]
-      },
-      {
-        id: '5',
-        title: 'Descubriendo los senderos del Parque Nacional Tierra del Fuego',
-        category: 'Viajes',
-        tags: ['Viajes', 'Naturaleza', 'Tierra del Fuego', 'Aventura'],
-        coverImage: 'https://images.unsplash.com/photo-1517022812141-23620dba5c23?w=1000&auto=format&fit=crop&q=80',
-        date: '10 de Julio de 2025',
-        author: {
-          name: 'Pablo Donato',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Pablo'
-        },
-        likes: 215,
-        commentsCount: 3,
-        shares: 88,
-        blocks: [
-          {
-            type: 'header',
-            data: {
-              text: 'El Fin del Mundo a Pie',
-              level: 2
-            }
-          },
-          {
-            type: 'paragraph',
-            data: {
-              text: 'El Parque Nacional Tierra del Fuego ofrece algunos de los paisajes de senderismo más impresionantes de la Patagonia. Con senderos que bordean el Canal Beagle y cruzan bosques subantárticos de lengas y coihues, es una visita obligada para los amantes de la aventura.'
-            }
-          },
-          {
-            type: 'image',
-            data: {
-              file: {
-                url: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=800&auto=format&fit=crop&q=60'
-              },
-              caption: 'Hermosa vista del lago enclavado en las montañas del fin del mundo.',
-              withBorder: false,
-              withBackground: false,
-              stretched: false
-            }
-          }
-        ],
-        comments: [
-          {
-            id: 'c4',
-            author: 'Enrique Torres',
-            avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Enrique',
-            text: '¡Hermoso lugar! Estuve allí el verano pasado y la Senda Costera es de ensueño.',
-            date: '11 de Julio de 2025'
-          },
-          {
-            id: 'c5',
-            author: 'Patricia Diaz',
-            avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Patricia',
-            text: '¿Es necesario contratar un guía o los caminos están bien señalizados?',
-            date: '12 de Julio de 2025'
-          },
-          {
-            id: 'c6',
-            author: 'Pablo Donato',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Pablo',
-            text: 'Patricia, los caminos principales están perfectamente señalizados y son auto-guiados. ¡Saludos!',
-            date: '12 de Julio de 2025'
-          }
-        ]
-      }
-    ];
-  }
 }
-
-/* 
- * RESUMEN DEL ARCHIVO:
- * Este archivo es un "Servicio". Centraliza la lógica para obtener, guardar o buscar datos. 
- * En una app real, aquí harías las peticiones a la base de datos o API. Por ahora, maneja los datos simulados.
- * Comparación con Expo: En Expo, crearías un archivo separado (ej. api.js o un custom hook de React) donde pones tus funciones fetch() para mantener separada la lógica de datos de la interfaz visual.
- */

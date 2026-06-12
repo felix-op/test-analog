@@ -44,7 +44,7 @@ import { BlogService } from '../services/blog.service';
               [value]="category()" 
               (change)="updateSignal(category, $event)"
               class="w-full px-3 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
-              @for (cat of blogService.categories; track cat) {
+              @for (cat of blogService.categories(); track cat) {
                 <option [value]="cat">{{ cat }}</option>
               }
             </select>
