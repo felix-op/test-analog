@@ -1,0 +1,126 @@
+<div class="ingredientes-container">
+  <header class="ingredientes-header">
+    <div>
+      <h1>Ingredientes</h1>
+      <p class="subtitle">Stock local de insumos para la demo</p>
+    </div>
+  </header>
+
+  <section class="toolbar-section">
+    <mat-form-field class="search-field" appearance="outline">
+      <mat-label>Buscar</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="search" [value]="busqueda()" (input)="setBusqueda($event)" />
+    </mat-form-field>
+
+    <div class="filters-actions-row">
+      <div class="filters-row" aria-label="Filtros de ingredientes">
+        <button
+          *ngFor="let filtro of filtros"
+          mat-stroked-button
+          type="button"
+          class="filter-button"
+          [class.active-filter]="filtroActivo() === filtro.id"
+          (click)="setFiltro(filtro.id)"
+        >
+          <mat-icon>{{ filtro.icon }}</mat-icon>
+          {{ filtro.label }}
+        </button>
+      </div>
+
+      <button mat-flat-button color="primary" type="button" class="add-button" (click)="abrirFormulario()">
+        <mat-icon>add</mat-icon>
+        Agregar ingrediente
+      </button>
+    </div>
+  </section>
+
+  <section class="ingredient-form-section" *ngIf="formularioAbierto()">
+    <div class="form-header">
+      <div>
+        <h2>{{ ingredienteEditando() ? 'Editar ingrediente' : 'Agregar ingrediente' }}</h2>
+        <p>El estado se calcula automáticamente por stock y vencimiento.</p>
+      </div>
+      <button mat-icon-button type="button" aria-label="Cerrar formulario" (click)="cerrarFormulario()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form class="ingredient-form" [formGroup]="ingredienteForm" (ngSubmit)="guardarIngrediente()">
+      <mat-form-field appearance="outline">
+        <mat-label>Ingrediente</mat-label>
+        <input matInput formControlName="nombre" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select formControlName="categoria">
+          <mat-option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Stock actual</mat-label>
+        <input matInput type="number" min="0" formControlName="cantidadDisponible" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Stock máximo</mat-label>
+        <input matInput type="number" min="1" formControlName="cantidadMaxima" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Unidad</mat-label>
+        <mat-select formControlName="unidad">
+          <mat-option *ngFor="let unidad of unidades" [value]="unidad">{{ unidad }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Vencimiento</mat-label>
+        <input matInput formControlName="fechaVencimiento" placeholder="20/07/2024" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Proveedor</mat-label>
+        <input matInput formControlName="proveedor" />
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-button type="button" (click)="cerrarFormulario()">Cancelar</button>
+        <button mat-flat-button color="primary" type="submit">
+          {{ ingredienteEditando() ? 'Guardar cambios' : 'Crear ingrediente' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="summary-row" aria-label="Resumen de ingredientes">
+    <div class="summary-item">
+      <strong>{{ ingredientes().length }}</strong>
+      <span>Ingredientes</span>
+    </div>
+    <div class="summary-item danger">
+      <strong>{{ ingredientesSinStock() }}</strong>
+      <span>Sin stock</span>
+    </div>
+    <div class="summary-item warning">
+      <strong>{{ ingredientesPorVencer() }}</strong>
+      <span>Por vencer</span>
+    </div>
+    <div class="summary-item warning">
+      <strong>{{ ingredientesBajoStock() }}</strong>
+      <span>Bajo stock</span>
+    </div>
+    <div class="summary-item success">
+      <strong>{{ ingredientesDisponibles() }}</strong>
+      <span>Disponibles</span>
+    </div>
+  </section>
+
+  <app-ingredientes-table
+    [items]="ingredientesFiltrados()"
+    (editar)="editarIngrediente($event)"
+    (eliminar)="eliminarIngrediente($event)"
+  ></app-ingredientes-table>
+</div>

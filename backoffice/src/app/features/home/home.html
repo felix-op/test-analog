@@ -27,7 +27,7 @@
       <p>Control de ingredientes críticos</p>
     </div>
     <div class="tarjetas-flex">
-      <app-ingrediente-card *ngFor="let item of ingredientes" [card]="item"></app-ingrediente-card>
+      <app-ingrediente-card *ngFor="let item of ingredientes()" [card]="item"></app-ingrediente-card>
     </div>
   </section>
 </div>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
 import { HomePage } from './features/home/home';
 import { InventarioPage } from './features/inventario/inventario';
+import { IngredientesPage } from './features/ingredientes/ingredientes';
 
 @Component({
   standalone: true,
@@ -20,7 +21,7 @@ export const routes: Routes = [
     // Rutas principales (Superiores)
     { path: 'inicio', component: HomePage },
     { path: 'inventario', component: InventarioPage },
-    { path: 'ingredientes', component: MockComponent },
+    { path: 'ingredientes', component: IngredientesPage },
     { path: 'proveedores', component: MockComponent },
     { path: 'soporte', component: MockComponent },
     { path: 'configuracion', component: MockComponent }

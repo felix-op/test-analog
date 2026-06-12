@@ -32,7 +32,6 @@ export class IngredienteCardComponent {
   }
 
   getProgress(): number {
-    const max = 300;
-    return Math.min(100, Math.round((this.card.cantidadDisponible / max) * 100));
+    return Math.min(100, Math.round((this.card.cantidadDisponible / this.card.cantidadMaxima) * 100));
   }
 }

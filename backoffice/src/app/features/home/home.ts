@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ResumenCardComponent } from '@components/resumen-card/resumen-card';
 import { IngredienteCardComponent } from '@components/ingrediente-card/ingrediente-card';
 import { InventarioCardComponent } from '@components/inventario-card/inventario-card';
+import { IngredientesService } from '@core/services/ingredientes.service';
 import { InventarioService } from '@core/services/inventario.service';
 import type { ResumenCard } from '@models/resumen-card.model';
 import type { IngredienteCard } from '@models/ingrediente-card.model';
@@ -17,6 +18,7 @@ import type { InventarioCard } from '@models/inventario-card.model';
 })
 export class HomePage {
   private readonly inventarioService = inject(InventarioService);
+  private readonly ingredientesService = inject(IngredientesService);
 
   tarjetas: ResumenCard[] = [
     {
@@ -57,29 +59,18 @@ export class HomePage {
     },
   ];
 
-  ingredientes: IngredienteCard[] = [
-    {
-      id: 'granos-cafe-java',
-      nombre: 'Granos de Café Java',
-      cantidadDisponible: 25,
-      cantidadMaxima: 300,
-      estado: 'faltante',
-    },
-    {
-      id: 'azucar',
-      nombre: 'Azúcar',
-      cantidadDisponible: 79,
-      cantidadMaxima: 400,
-      estado: 'limite vencimiento',
-    },
-    {
-      id: 'leche',
-      nombre: 'Leche',
-      cantidadDisponible: 290,
-      cantidadMaxima: 100,
-      estado: 'disponible',
-    },
-  ];
+  ingredientes = computed<IngredienteCard[]>(() =>
+    this.ingredientesService
+      .obtenerIngredientesCriticos()
+      .slice(0, 4)
+      .map((ingrediente) => ({
+        id: ingrediente.id,
+        nombre: ingrediente.nombre,
+        cantidadDisponible: ingrediente.cantidadDisponible,
+        cantidadMaxima: ingrediente.cantidadMaxima,
+        estado: this.mapIngredienteEstado(ingrediente.estado),
+      })),
+  );
 
   inventario = computed<InventarioCard[]>(() =>
     this.inventarioService
@@ -98,5 +89,12 @@ export class HomePage {
     if (estado === 'inactivo') return 2;
     if (estado === 'en revisión') return 1;
     return 0;
+  }
+
+  private mapIngredienteEstado(estado: 'disponible' | 'bajo stock' | 'sin stock' | 'por vencer'): IngredienteCard['estado'] {
+    if (estado === 'sin stock') return 'faltante';
+    if (estado === 'bajo stock') return 'limite compra';
+    if (estado === 'por vencer') return 'limite vencimiento';
+    return 'disponible';
   }
 }
