@@ -22,7 +22,6 @@ export const routes: Routes = [
     { path: 'inicio', component: HomePage },
     { path: 'inventario', component: InventarioPage },
     { path: 'ingredientes', component: IngredientesPage },
-    { path: 'proveedores', component: MockComponent },
     { path: 'soporte', component: MockComponent },
     { path: 'configuracion', component: MockComponent }
 ];
