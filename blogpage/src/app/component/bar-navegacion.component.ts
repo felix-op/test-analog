@@ -129,7 +129,7 @@ export class BarNavegacionComponent {
   loadMoreCategoriesRequested = output<void>();
 
   selectCategory(category: string) {
-    this.categorySelected.emit(category);
+    this.categorySelected.emit(this.activeCategory() === category ? null : category);
     this.viewSelected.emit('explorer');
   }
 

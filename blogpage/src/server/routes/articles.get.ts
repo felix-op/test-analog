@@ -1,4 +1,5 @@
 import { defineEventHandler, getQuery } from 'h3';
+import { formatCategory, normalizeTags } from '../utils/article-mapper';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -25,11 +26,8 @@ export default defineEventHandler(async (event) => {
     
     // Mapeamos los datos recibidos a nuestro formato de tipo 'Article'
     const articles = devToArticles.map((art: any) => {
-      // Determinamos una categoría basada en la primera etiqueta, o 'Tecnología' por defecto
-      const firstTag = art.tag_list && art.tag_list[0];
-      const category = firstTag 
-        ? firstTag.charAt(0).toUpperCase() + firstTag.slice(1) 
-        : 'Tecnología';
+      const tags = normalizeTags(art.tag_list || art.tags);
+      const category = formatCategory(tags);
 
       // Formateamos la fecha a un formato legible en español (ej: "12 de junio de 2026")
       const date = new Date(art.published_at).toLocaleDateString('es-ES', {
@@ -43,7 +41,7 @@ export default defineEventHandler(async (event) => {
         id: art.id.toString(),
         title: art.title,
         category,
-        tags: art.tag_list || [],
+        tags,
         coverImage: art.cover_image || art.social_image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1000',
         date,
         author: {

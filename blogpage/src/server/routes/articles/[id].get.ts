@@ -1,4 +1,5 @@
 import { defineEventHandler, getRouterParam } from 'h3';
+import { formatCategory, normalizeTags } from '../../utils/article-mapper';
 
 // Función para parsear Markdown básico a bloques estructurados compatibles con Editor.js
 function parseMarkdownToBlocks(markdown: string): any[] {
@@ -142,10 +143,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // 3. Mapeamos la categoría e información básica
-    const firstTag = devToArticle.tag_list && devToArticle.tag_list[0];
-    const category = firstTag 
-      ? firstTag.charAt(0).toUpperCase() + firstTag.slice(1) 
-      : 'Tecnología';
+    const tags = normalizeTags(devToArticle.tag_list || devToArticle.tags);
+    const category = formatCategory(tags);
 
     const date = new Date(devToArticle.published_at).toLocaleDateString('es-ES', {
       day: 'numeric',
@@ -160,7 +159,7 @@ export default defineEventHandler(async (event) => {
       id: devToArticle.id.toString(),
       title: devToArticle.title,
       category,
-      tags: devToArticle.tag_list || [],
+      tags,
       coverImage: devToArticle.cover_image || devToArticle.social_image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1000',
       date,
       author: {

@@ -1,4 +1,5 @@
 import { Component, signal, computed, inject, ViewChild, ElementRef } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { BarNavegacionComponent } from '../component/bar-navegacion.component';
 import { BlogRenderComponent } from '../component/blog-render.component';
 import { BlogEditorComponent } from '../component/blog-editor.component';
@@ -8,7 +9,7 @@ import { Article } from '../types/blog.type';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [BarNavegacionComponent, BlogRenderComponent, BlogEditorComponent],
+  imports: [RouterLink, BarNavegacionComponent, BlogRenderComponent, BlogEditorComponent],
   template: `
     <div class="flex min-h-screen w-full bg-slate-50 text-slate-800">
       
@@ -115,8 +116,8 @@ import { Article } from '../types/blog.type';
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   @for (art of filteredArticles(); track art.id) {
                     
-                    <div 
-                      (click)="viewArticle(art)"
+                    <div
+                      [routerLink]="['/articles', art.id]"
                       class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5">
                       
                       <div>
