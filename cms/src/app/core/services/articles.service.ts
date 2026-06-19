@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from "@angular/core";
+import { inject, Injectable, signal, computed } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, of, shareReplay, tap } from "rxjs";
 import { Article } from "@models/article.model";
@@ -7,45 +7,69 @@ import { Article } from "@models/article.model";
 export class ArticlesService {
   private readonly http = inject(HttpClient);
 
-  private readonly _articles = signal<Article[]>([]);
-  readonly articles = this._articles.asReadonly();
-
-  private readonly _hasMore = signal<boolean>(true);
-  readonly hasMore = this._hasMore.asReadonly();
-
+  private readonly _allArticles = signal<Article[]>([]);
   private readonly _loading = signal<boolean>(false);
-  readonly loading = this._loading.asReadonly();
-
   private readonly _currentPage = signal<number>(1);
-  readonly currentPage = this._currentPage.asReadonly();
-
   private readonly _activeTag = signal<string>("");
+  private readonly _searchQuery = signal<string>("");
+
+  private readonly pageSize = 12;
+
+  readonly loading = this._loading.asReadonly();
   readonly activeTag = this._activeTag.asReadonly();
+  readonly searchQuery = this._searchQuery.asReadonly();
+
+  // Para compatibilidad donde se requieran todos (por si acaso)
+  readonly articles = this._allArticles.asReadonly();
+
+  // 1. Filtrar la lista maestra por tag y query
+  readonly filteredArticles = computed(() => {
+    const all = this._allArticles();
+    const tag = (this._activeTag() ?? '').toLowerCase();
+    const query = (this._searchQuery() ?? '').toLowerCase().trim();
+
+    return all.filter((a) => {
+      console.log("Que es esto: ", a.tags);
+      const matchTag = tag ? a.tags?.map(t => t?.toLowerCase() ?? '').includes(tag) : true;
+      const matchQuery = query 
+        ? (a.title?.toLowerCase() ?? '').includes(query) || (a.tags && a.tags.some(t => (t?.toLowerCase() ?? '').includes(query)))
+        : true;
+      return matchTag && matchQuery;
+    });
+  });
+
+  // 2. Tomar la rebanada correspondiente según la paginación local
+  readonly paginatedArticles = computed(() => {
+    const filtered = this.filteredArticles();
+    const limit = this._currentPage() * this.pageSize;
+    return filtered.slice(0, limit);
+  });
+
+  // 3. ¿Quedan más para mostrar localmente?
+  readonly hasMore = computed(() => {
+    return this.paginatedArticles().length < this.filteredArticles().length;
+  });
 
   private readonly detailCache = new Map<string, Observable<Article>>();
+  private initialized = false;
 
   constructor() {
-    this.getArticles(1);
+    this.getArticles();
   }
 
-  getArticles(page: number = 1, tag?: string): void {
-    if (typeof window === "undefined") return;
+  // Traer todos de una vez desde el endpoint
+  getArticles(): void {
+    if (typeof window === "undefined" || this.initialized) return;
     this._loading.set(true);
 
-    const activeTag = tag !== undefined ? tag : this._activeTag();
-    let url = `/api/v1/articles?page=${page}&per_page=10`;
-    if (activeTag) url += `&tag=${encodeURIComponent(activeTag.toLowerCase())}`;
+    // Pedimos 1000 para obtener "todos" los disponibles sin paginar manual
+    const url = `/api/v1/articles?per_page=1000`;
 
     this.http.get<Article[]>(url).subscribe({
       next: (articles) => {
         if (!Array.isArray(articles)) return;
-        this._hasMore.set(articles.length >= 10);
-        if (page === 1) {
-          this._articles.set(articles);
-        } else {
-          this._articles.update((current) => [...current, ...articles]);
-        }
-        this._currentPage.set(page);
+        this._allArticles.set(articles);
+        this.initialized = true;
       },
       error: (err) => console.error("Error al cargar artículos:", err),
       complete: () => this._loading.set(false),
@@ -53,8 +77,9 @@ export class ArticlesService {
   }
 
   getMoreArticles(): void {
-    if (this._loading() || !this._hasMore()) return;
-    this.getArticles(this._currentPage() + 1);
+    if (this.hasMore()) {
+      this._currentPage.update(c => c + 1);
+    }
   }
 
   filterByTag(tag: string | null): void {
@@ -62,9 +87,13 @@ export class ArticlesService {
     if (next === this._activeTag()) return;
     this._activeTag.set(next);
     this._currentPage.set(1);
-    this._hasMore.set(true);
-    this._articles.set([]);
-    this.getArticles(1, next);
+  }
+
+  setSearchQuery(query: string | null | undefined): void {
+    const next = query ?? "";
+    if (next === this._searchQuery()) return;
+    this._searchQuery.set(next);
+    this._currentPage.set(1);
   }
 
   getArticle(id: string): Observable<Article> {
@@ -81,7 +110,7 @@ export class ArticlesService {
   createArticle(article: Omit<Article, "id">): Observable<Article> {
     return this.http.post<Article>("/api/v1/article", article).pipe(
       tap((created) => {
-        this._articles.update((current) => [created, ...current]);
+        this._allArticles.update((current) => [created, ...current]);
         this.detailCache.set(created.id, of(created).pipe(shareReplay(1)));
       })
     );
@@ -92,7 +121,7 @@ export class ArticlesService {
       .put<Article>(`/api/v1/article/${article.id}`, article)
       .pipe(
         tap((updated) => {
-          this._articles.update((current) =>
+          this._allArticles.update((current) =>
             current.map((a) => (a.id === updated.id ? updated : a))
           );
           this.detailCache.set(updated.id, of(updated).pipe(shareReplay(1)));
@@ -103,7 +132,7 @@ export class ArticlesService {
   deleteArticle(id: string): void {
     this.http.delete<void>(`/api/v1/article/${id}`).subscribe({
       next: () => {
-        this._articles.update((current) => current.filter((a) => a.id !== id));
+        this._allArticles.update((current) => current.filter((a) => a.id !== id));
         this.detailCache.delete(id);
       },
       error: (err) => console.error("Error al eliminar artículo:", err),

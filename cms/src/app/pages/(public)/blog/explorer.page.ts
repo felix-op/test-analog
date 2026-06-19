@@ -61,7 +61,7 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
         </div>
 
       <!-- Estado Vacío -->
-      } @else if (filteredArticles().length === 0) {
+      } @else if (service.paginatedArticles().length === 0) {
         <div
           class="bg-white border border-slate-200/60 rounded-2xl p-12 text-center space-y-3 shadow-sm"
         >
@@ -86,7 +86,7 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
 
         <!-- Grid de Artículos -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          @for (art of filteredArticles(); track art.id) {
+          @for (art of service.paginatedArticles(); track art.id) {
             <div
               [routerLink]="['/blog/article', art.id]"
               class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5"
@@ -196,19 +196,10 @@ export default class ExplorerPage {
   selectedCategory = input<string | null>(null);
   searchQuery = input<string>("");
 
-  readonly filteredArticles = computed<Article[]>(() => {
-    const query = this.searchQuery()?.toLowerCase().trim() ?? "";
-    if (!query) return this.service.articles();
-    return this.service.articles().filter(
-      (a) =>
-        a.title.toLowerCase().includes(query) ||
-        (a.tags && a.tags.some((t) => t.toLowerCase().includes(query))),
-    );
-  });
-
   constructor() {
     effect(() => {
       this.service.filterByTag(this.selectedCategory());
+      this.service.setSearchQuery(this.searchQuery());
     });
   }
 
