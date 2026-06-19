@@ -76,7 +76,7 @@ export const routeMeta: RouteMeta = {
       />
       <!-- Panel de Contenido Principal (Scrollable) -->
       <div #contentPanel class="flex-1 flex flex-col h-screen overflow-y-auto">
-        <app-blog-header />
+        <app-blog-header class="sticky top-0 z-10 block" />
         <main class="flex-1 p-6">
           <router-outlet></router-outlet>
         </main>

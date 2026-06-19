@@ -12,7 +12,7 @@ import { FormsModule } from "@angular/forms";
   imports: [IconSearchComponent, IconArrowLeftComponent, FormsModule],
   template: `
     <header
-      class="sticky top-0 bg-white border-b border-slate-200/80 px-6 py-4 flex items-center justify-between z-10 shadow-sm/5"
+      class="bg-white border-b border-slate-200/80 px-6 py-4 flex items-center justify-between shadow-sm/5"
     >
       <!-- Botón de retorno o título según la ruta -->
       <div class="flex items-center gap-3">
