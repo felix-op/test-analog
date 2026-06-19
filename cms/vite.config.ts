@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@services": path.resolve(__dirname, './src/app/core/services'),
       "@components": path.resolve(__dirname, './src/app/core/components'),
+      "@models": path.resolve(__dirname, './src/app/core/models'),
     }
   },
   plugins: [

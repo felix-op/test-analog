@@ -1,8 +1,6 @@
-import { Component } from '@angular/core';
+import { RouteMeta } from '@analogjs/router';
 
-@Component({
-  selector: 'app-home-tab',
-  imports: [],
-  template: `Hello world`,
-})
-export default class HomeTab {}
+export const routeMeta: RouteMeta = {
+  redirectTo: '/blog/explorer',
+  pathMatch: 'full',
+};
