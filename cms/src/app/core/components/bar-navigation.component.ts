@@ -1,4 +1,7 @@
-import { Component, input, output } from "@angular/core";
+import { Component, computed, inject, input, output } from "@angular/core";
+import { NavigationEnd, Router } from "@angular/router";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { filter, map, startWith } from "rxjs";
 import { IconAnalogComponent } from "./icon-analog.component";
 import { BarNavegationItemComponent } from "./bar-navigation-item.component";
 import { IconHomeComponent } from "./icon-home.component";
@@ -74,7 +77,7 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
             @for (cat of categories(); track cat) {
               <app-bar-navegation-category
                 [label]="cat"
-                [active]="activeCategory() === cat && activeView() === 'explorer'"
+                [active]="activeCategory() === cat"
                 (onClick)="selectCategory(cat)"
               />
             }
@@ -92,7 +95,7 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
           <!-- Botón "Cargar más categorías" con flecha -->
           @if (hasMoreCategories() && !loadingCategories()) {
             <button
-              (click)="loadMoreCategories()"
+              (click)="loadMoreCategoriesRequested.emit()"
               class="w-full flex items-center justify-center gap-2 mt-2 py-2 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 shrink-0 group cursor-pointer"
             >
               <span>Más categorías</span>
@@ -119,34 +122,30 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
   `,
 })
 export class BarNavegacionComponent {
-  // Inputs usando la API de Signal Inputs (Angular 17+)
-  activeCategory = input<string | null>(null);
-  activeView = input<"explorer" | "editor" | "viewer">("explorer");
+  private readonly router = inject(Router);
+
   categories = input<string[]>([]);
   hasMoreCategories = input<boolean>(true);
   loadingCategories = input<boolean>(false);
-
-  // Outputs usando output() API
-  categorySelected = output<string | null>();
-  viewSelected = output<"explorer" | "editor" | "viewer">();
   loadMoreCategoriesRequested = output<void>();
 
+  private readonly queryParams = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => this.router.parseUrl(this.router.url).queryParams),
+      startWith(this.router.parseUrl(this.router.url).queryParams),
+    ),
+  );
+
+  readonly activeCategory = computed(
+    () => (this.queryParams()?.["selectedCategory"] as string) ?? null,
+  );
+
   selectCategory(category: string) {
-    this.categorySelected.emit(
-      this.activeCategory() === category ? null : category,
-    );
-    this.viewSelected.emit("explorer");
-  }
-
-  selectView(view: "explorer" | "editor" | "viewer") {
-    if (view === "explorer") {
-      this.categorySelected.emit(null);
-    }
-    this.viewSelected.emit(view);
-  }
-
-  loadMoreCategories() {
-    this.loadMoreCategoriesRequested.emit();
+    const next = this.activeCategory() === category ? undefined : category;
+    this.router.navigate(["/blog/explorer"], {
+      queryParams: { selectedCategory: next },
+    });
   }
 
   abrirAyuda() {

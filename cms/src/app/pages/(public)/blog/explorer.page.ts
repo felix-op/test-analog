@@ -41,8 +41,27 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
         <app-button-add (onClick)="onCreateArticle()" />
       </div>
 
+      <!-- Estado de carga inicial -->
+      @if (service.loading() && service.articles().length === 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (i of skeletons; track i) {
+            <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+              <div class="w-full h-44 bg-slate-100 animate-pulse"></div>
+              <div class="p-5 space-y-3">
+                <div class="h-3 w-16 bg-slate-100 rounded animate-pulse"></div>
+                <div class="h-4 w-full bg-slate-100 rounded animate-pulse"></div>
+                <div class="h-4 w-3/4 bg-slate-100 rounded animate-pulse"></div>
+              </div>
+              <div class="px-5 py-4 border-t border-slate-100 flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-slate-100 animate-pulse"></div>
+                <div class="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
+              </div>
+            </div>
+          }
+        </div>
+
       <!-- Estado Vacío -->
-      @if (filteredArticles().length === 0) {
+      } @else if (filteredArticles().length === 0) {
         <div
           class="bg-white border border-slate-200/60 rounded-2xl p-12 text-center space-y-3 shadow-sm"
         >
@@ -172,6 +191,7 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
 export default class ExplorerPage {
   protected readonly service = inject(ArticlesService);
   private readonly router = inject(Router);
+  readonly skeletons = Array(6).fill(0);
 
   selectedCategory = input<string | null>(null);
   searchQuery = input<string>("");

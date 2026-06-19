@@ -10,7 +10,7 @@ import { RouterLink, RouterLinkActive } from "@angular/router";
         #rla="routerLinkActive"
         [routerLink]="link()"
         routerLinkActive="bg-white text-red-600 shadow-sm border-slate-200/50 font-semibold"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
         [ngClass]="{
             'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900': !rla.isActive,
         }"
