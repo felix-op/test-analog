@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, shareReplay, tap } from "rxjs";
+import { Observable, of, shareReplay, tap } from "rxjs";
 import { Article } from "@models/article.model";
 
 @Injectable({ providedIn: "root" })
@@ -82,6 +82,7 @@ export class ArticlesService {
     return this.http.post<Article>("/api/v1/article", article).pipe(
       tap((created) => {
         this._articles.update((current) => [created, ...current]);
+        this.detailCache.set(created.id, of(created).pipe(shareReplay(1)));
       })
     );
   }
@@ -94,7 +95,7 @@ export class ArticlesService {
           this._articles.update((current) =>
             current.map((a) => (a.id === updated.id ? updated : a))
           );
-          this.detailCache.delete(article.id);
+          this.detailCache.set(updated.id, of(updated).pipe(shareReplay(1)));
         })
       );
   }

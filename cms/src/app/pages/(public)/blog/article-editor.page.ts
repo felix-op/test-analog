@@ -9,13 +9,15 @@ import {
 import { Router } from '@angular/router';
 import { ArticlesService } from '@services/articles.service';
 import { TagsService } from '@services/tags.service';
-import { EditorContentComponent } from '@components/editor-content.component';
+import { CampoInputComponent } from '@components/campo-input.component';
+import { CampoSelectorComponent } from '@components/campo-selector.component';
+import { CampoEditorComponent } from '@components/campo-editor.component';
 import { Article } from '@models/article.model';
 import { Block } from '@models/block.model';
 
 @Component({
   selector: 'app-article-editor',
-  imports: [EditorContentComponent],
+  imports: [CampoInputComponent, CampoSelectorComponent, CampoEditorComponent],
   template: `
     <div class="max-w-3xl mx-auto p-6 space-y-6 text-left">
 
@@ -26,7 +28,9 @@ import { Block } from '@models/block.model';
             {{ articleId ? 'Editar Artículo' : 'Nuevo Artículo' }}
           </h1>
           <p class="text-[11px] text-slate-400 font-medium mt-0.5">
-            {{ articleId ? 'Modificá el contenido y guardá los cambios' : 'Completá los campos para publicar un nuevo artículo' }}
+            {{ articleId
+              ? 'Modificá el contenido y guardá los cambios'
+              : 'Completá los campos para publicar un nuevo artículo' }}
           </p>
         </div>
         <button
@@ -37,104 +41,62 @@ import { Block } from '@models/block.model';
         </button>
       </div>
 
-      <!-- Formulario de metadatos -->
-      <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm space-y-4">
-        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-          Metadatos
-        </h3>
+      <!-- Metadatos -->
+      <div class="flex flex-col bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm space-y-4">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Metadatos</h3>
 
-        <!-- Título -->
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-600">Título *</label>
-          <input
-            type="text"
-            [value]="title()"
-            (input)="title.set(val($event))"
-            placeholder="Ej. Avances en inteligencia artificial"
-            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <app-campo-input
+          label="Título"
+          placeholder="Ej. Avances en inteligencia artificial"
+          [required]="true"
+          [(value)]="title"
+          [error]="errors.title()"
+        />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Categoría (select de tags existentes) -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-slate-600">Categoría *</label>
-            <select
-              [value]="category()"
-              (change)="category.set(val($event))"
-              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="" disabled>Seleccioná una categoría</option>
-              @for (tag of tagsService.tags(); track tag) {
-                <option [value]="tag">{{ tag }}</option>
-              }
-            </select>
-          </div>
+          <app-campo-selector
+            label="Categoría"
+            placeholder="Seleccioná una categoría"
+            [options]="tagsService.tags()"
+            [required]="true"
+            [(value)]="category"
+            [error]="errors.category()"
+          />
 
-          <!-- Autor -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-slate-600">Autor *</label>
-            <input
-              type="text"
-              [value]="authorName()"
-              (input)="authorName.set(val($event))"
-              placeholder="Ej. María García"
-              class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Tags -->
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-600">
-            Tags
-            <span class="font-normal text-slate-400">(separados por coma)</span>
-          </label>
-          <input
-            type="text"
-            [value]="tags()"
-            (input)="tags.set(val($event))"
-            placeholder="Ej. angular, typescript, web"
-            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          <app-campo-input
+            label="Autor"
+            placeholder="Ej. María García"
+            [required]="true"
+            [(value)]="authorName"
+            [error]="errors.author()"
           />
         </div>
 
-        <!-- Portada -->
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-600">
-            URL de Portada
-            <span class="font-normal text-slate-400">(opcional)</span>
-          </label>
-          <input
-            type="url"
-            [value]="coverImage()"
-            (input)="coverImage.set(val($event))"
-            placeholder="https://images.unsplash.com/..."
-            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
+        <app-campo-input
+          label="Tags"
+          placeholder="Ej. angular, typescript, web"
+          [(value)]="tags"
+        />
+
+        <app-campo-input
+          label="URL de Portada"
+          placeholder="https://images.unsplash.com/..."
+          type="url"
+          [(value)]="coverImage"
+        />
+      </div>
+
+      <!-- Editor de contenido -->
+      @if (editorReady()) {
+        <app-campo-editor
+          #editorRef
+          [initialBlocks]="initialBlocks()"
+          [error]="errors.content()"
+        />
+      } @else {
+        <div class="bg-white border border-slate-200 rounded-2xl min-h-64 flex items-center justify-center shadow-sm">
+          <p class="text-sm text-slate-400 font-medium">Cargando editor…</p>
         </div>
-      </div>
-
-      <!-- Editor de contenido (solo se monta cuando los datos están listos) -->
-      <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider block">
-          Contenido del Artículo
-        </label>
-
-        @if (editorReady()) {
-          <app-editor-content #editorRef [initialBlocks]="initialBlocks()" />
-        } @else {
-          <div class="bg-white border border-slate-200 rounded-2xl min-h-64 flex items-center justify-center shadow-sm">
-            <p class="text-sm text-slate-400 font-medium">Cargando editor…</p>
-          </div>
-        }
-      </div>
-
-      <!-- Error de validación -->
-      @if (validationError()) {
-        <p class="text-xs font-semibold text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-          {{ validationError() }}
-        </p>
       }
 
       <!-- Acciones -->
@@ -162,12 +124,11 @@ export default class ArticleEditorPage implements OnInit {
   private readonly articlesService = inject(ArticlesService);
   protected readonly tagsService = inject(TagsService);
 
-  @ViewChild('editorRef') editorRef?: EditorContentComponent;
+  @ViewChild('editorRef') editorRef?: CampoEditorComponent;
 
-  // Recibe el id del artículo a editar vía query param (?articleId=xxx)
   @Input() articleId: string = '';
 
-  // Estado del formulario
+  // Campos del formulario (two-way binding con [(value)] en los campos)
   title = signal('');
   category = signal('');
   tags = signal('');
@@ -177,7 +138,14 @@ export default class ArticleEditorPage implements OnInit {
   initialBlocks = signal<Block[]>([]);
   editorReady = signal(false);
   saving = signal(false);
-  validationError = signal('');
+
+  // Errores por campo
+  errors = {
+    title: signal(''),
+    category: signal(''),
+    author: signal(''),
+    content: signal(''),
+  };
 
   private existing: Article | null = null;
 
@@ -204,33 +172,58 @@ export default class ArticleEditorPage implements OnInit {
     }
   }
 
-  // Extrae el valor de un input/select desde el evento nativo
-  val(event: Event): string {
-    return (event.target as HTMLInputElement | HTMLSelectElement).value;
+  private validate(blocks: Block[]): boolean {
+    let valid = true;
+
+    if (!this.title().trim()) {
+      this.errors.title.set('El título es obligatorio.');
+      valid = false;
+    } else {
+      this.errors.title.set('');
+    }
+
+    if (!this.category().trim()) {
+      this.errors.category.set('La categoría es obligatoria.');
+      valid = false;
+    } else {
+      this.errors.category.set('');
+    }
+
+    if (!this.authorName().trim()) {
+      this.errors.author.set('El autor es obligatorio.');
+      valid = false;
+    } else {
+      this.errors.author.set('');
+    }
+
+    if (blocks.length === 0) {
+      this.errors.content.set('El contenido no puede estar vacío.');
+      valid = false;
+    } else {
+      this.errors.content.set('');
+    }
+
+    return valid;
   }
 
   async save() {
-    this.validationError.set('');
-
-    const titleVal = this.title().trim();
-    const authorVal = this.authorName().trim();
-    const categoryVal = this.category().trim();
-
-    if (!titleVal) return this.validationError.set('El título es obligatorio.');
-    if (!authorVal) return this.validationError.set('El autor es obligatorio.');
-    if (!categoryVal) return this.validationError.set('La categoría es obligatoria.');
-
     this.saving.set(true);
 
     const blocks = (await this.editorRef?.getBlocks()) ?? [];
+
+    if (!this.validate(blocks)) {
+      this.saving.set(false);
+      return;
+    }
+
     const tagsArray = this.tags()
       .split(',')
       .map((t) => t.trim())
       .filter(Boolean);
 
     const payload = {
-      title: titleVal,
-      category: categoryVal,
+      title: this.title().trim(),
+      category: this.category(),
       tags: tagsArray,
       coverImage:
         this.coverImage().trim() ||
@@ -243,10 +236,10 @@ export default class ArticleEditorPage implements OnInit {
           day: 'numeric',
         }),
       author: {
-        name: authorVal,
+        name: this.authorName().trim(),
         avatar:
           this.existing?.author.avatar ??
-          `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authorVal)}`,
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(this.authorName().trim())}`,
       },
       likes: this.existing?.likes ?? 0,
       commentsCount: this.existing?.commentsCount ?? 0,
@@ -264,7 +257,7 @@ export default class ArticleEditorPage implements OnInit {
       error: (err) => {
         console.error('Error al guardar artículo:', err);
         this.saving.set(false);
-        this.validationError.set('Ocurrió un error al guardar. Intentá de nuevo.');
+        this.errors.content.set('Ocurrió un error al guardar. Intentá de nuevo.');
       },
     });
   }

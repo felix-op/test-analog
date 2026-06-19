@@ -1,24 +1,30 @@
-import {
-  Component,
-  afterNextRender,
-  input,
-  OnDestroy,
-} from '@angular/core';
+import { Component, afterNextRender, input, OnDestroy } from '@angular/core';
 import type { Block } from '@models/block.model';
 
 @Component({
-  selector: 'app-editor-content',
+  selector: 'app-campo-editor',
   template: `
-    <div
-      class="bg-white border border-slate-200 rounded-2xl min-h-64 shadow-sm"
-    >
-      <div [id]="holderId" class="px-6 py-4 prose max-w-none text-slate-700"></div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+        {{ label() }}
+      </label>
+
+      <div [class]="wrapperClass()">
+        <div [id]="holderId" class="px-6 py-4 prose max-w-none text-slate-700 min-h-48"></div>
+      </div>
+
+      @if (error()) {
+        <p class="text-[11px] font-semibold text-red-500">{{ error() }}</p>
+      }
     </div>
   `,
 })
-export class EditorContentComponent implements OnDestroy {
+export class CampoEditorComponent implements OnDestroy {
   readonly holderId = 'editorjs-holder';
-  readonly initialBlocks = input<Block[]>([]);
+
+  label = input<string>('Contenido del Artículo');
+  initialBlocks = input<Block[]>([]);
+  error = input<string>('');
 
   private editorInstance: any = null;
 
@@ -35,7 +41,7 @@ export class EditorContentComponent implements OnDestroy {
           header: { class: Header as any, inlineToolbar: true },
           list: { class: List as any, inlineToolbar: true },
         },
-        placeholder: 'Haz clic aquí para escribir el contenido del artículo…',
+        placeholder: 'Haz clic aquí para comenzar a escribir…',
       });
     });
   }
@@ -44,6 +50,13 @@ export class EditorContentComponent implements OnDestroy {
     if (!this.editorInstance) return [];
     const output = await this.editorInstance.save();
     return output.blocks as Block[];
+  }
+
+  wrapperClass() {
+    const base = 'bg-white border rounded-2xl shadow-sm';
+    return this.error()
+      ? `${base} border-red-300`
+      : `${base} border-slate-200`;
   }
 
   ngOnDestroy() {
