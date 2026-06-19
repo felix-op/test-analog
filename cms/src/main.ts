@@ -4,3 +4,8 @@ import { App } from './app/app';
 import { appConfig } from './app/app.config';
 
 bootstrapApplication(App, appConfig);
+
+/*
+    El archivo principal que conecta Angular con el Navegador
+    Inicializa la app en el frontend
+*/

@@ -24,6 +24,7 @@
     "skipLibCheck": true,
     "paths": {
       "@services/*": ["src/app/core/services/*"],
+      "@components/*": ["src/app/core/components/*"],
     }
   },
   "angularCompilerOptions": {

@@ -3,6 +3,9 @@ import { provideServerRendering } from '@angular/platform-server';
 
 import { appConfig } from './app.config';
 
+/**
+ * Configuración de Providers para el Servidor
+ */
 const serverConfig: ApplicationConfig = {
   providers: [provideServerRendering()],
 };

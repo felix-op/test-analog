@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { RouteMeta } from '@analogjs/router';
+import { BarNavegacionComponent } from "@components/bar-navigation.component";
 
 // Para agregar metadatos a una ruta se puede hacer con:
 
@@ -61,11 +62,22 @@ export const routeMeta: RouteMeta = {
 
 @Component({
   selector: 'app-blog-layout',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, BarNavegacionComponent],
   template: `
-    <h2>Layout</h2>
-
-    <router-outlet></router-outlet>
+    <div class="flex min-h-screen w-full bg-slate-50 text-slate-800">
+      <app-bar-navegation
+        class="w-64 shrink-0 h-screen sticky top-0"
+        /* [activeCategory]="selectedCategory()"
+        [activeView]="activeView()"
+        [categories]="blogService.categories()"
+        [hasMoreCategories]="blogService.hasMoreCategories()"
+        [loadingCategories]="blogService.loadingCategories()"
+        (categorySelected)="onCategorySelected($event)"
+        (viewSelected)="onViewSelected($event)"
+        (loadMoreCategoriesRequested)="onLoadMoreCategories()" */
+      />
+      <router-outlet></router-outlet>
+    </div>
   `,
 })
 export default class BlogLayout {
