@@ -44,19 +44,13 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
         </div>
 
         <!-- Navegación Principal -->
-        <nav class="space-y-1.5 shrink-0">
-          <app-bar-navegation-item
-            (onClick)="selectView('explorer')"
-            [active]="activeView() === 'explorer'"
-          >
+        <nav class="flex flex-col space-y-1.5 shrink-0">
+          <app-bar-navegation-item link="/blog/explorer">
             <app-icon-home />
             <span>Inicio / Explorador</span>
           </app-bar-navegation-item>
 
-          <app-bar-navegation-item
-            (onClick)="selectView('editor')"
-            [active]="activeView() === 'editor'"
-          >
+          <app-bar-navegation-item link="/blog/article-editor">
             <app-icon-edit />
             <span>Escribir Artículo</span>
           </app-bar-navegation-item>
@@ -99,7 +93,7 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
           @if (hasMoreCategories() && !loadingCategories()) {
             <button
               (click)="loadMoreCategories()"
-              class="w-full flex items-center justify-center gap-2 mt-2 py-2 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 shrink-0 group"
+              class="w-full flex items-center justify-center gap-2 mt-2 py-2 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 shrink-0 group cursor-pointer"
             >
               <span>Más categorías</span>
               <app-icon-chevron-down />
@@ -112,7 +106,7 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
       <div class="space-y-1 shrink-0">
         <button
           (click)="abrirAyuda()"
-          class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 text-left text-sm group"
+          class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 text-left text-sm group cursor-pointer"
         >
           <app-icon-help />
           <span>Soporte y Ayuda</span>

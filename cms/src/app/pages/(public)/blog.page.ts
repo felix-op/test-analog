@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { RouteMeta } from '@analogjs/router';
 import { BarNavegacionComponent } from "@components/bar-navigation.component";
 import { BlogHeaderComponent } from "@components/blog-header.component";
+import { TagsService } from "@services/tags.service";
 
 // Para agregar metadatos a una ruta se puede hacer con:
 
@@ -68,14 +69,10 @@ export const routeMeta: RouteMeta = {
     <div class="flex min-h-screen w-full bg-slate-50 text-slate-800">
       <app-bar-navegation
         class="w-64 shrink-0 h-screen sticky top-0"
-        /* [activeCategory]="selectedCategory()"
-        [activeView]="activeView()"
-        [categories]="blogService.categories()"
-        [hasMoreCategories]="blogService.hasMoreCategories()"
-        [loadingCategories]="blogService.loadingCategories()"
-        (categorySelected)="onCategorySelected($event)"
-        (viewSelected)="onViewSelected($event)"
-        (loadMoreCategoriesRequested)="onLoadMoreCategories()" */
+        [categories]="tagsService.tags()"
+        [hasMoreCategories]="tagsService.hasMore()"
+        [loadingCategories]="tagsService.loading()"
+        (loadMoreCategoriesRequested)="tagsService.getMoreTags()"
       />
       <!-- Panel de Contenido Principal (Scrollable) -->
       <div #contentPanel class="flex-1 flex flex-col h-screen overflow-y-auto">
@@ -88,5 +85,5 @@ export const routeMeta: RouteMeta = {
   `,
 })
 export default class BlogLayout {
-  //private readonly service = inject(BlogService);
+  readonly tagsService = inject(TagsService);
 }
