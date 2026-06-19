@@ -12,12 +12,18 @@ export class ArticlesService {
   private readonly _currentPage = signal<number>(1);
   private readonly _activeTag = signal<string>("");
   private readonly _searchQuery = signal<string>("");
+  private readonly _favorites = signal<Set<string>>(new Set());
 
   private readonly pageSize = 12;
 
   readonly loading = this._loading.asReadonly();
   readonly activeTag = this._activeTag.asReadonly();
   readonly searchQuery = this._searchQuery.asReadonly();
+  
+  readonly favorites = computed(() => {
+    const favIds = this._favorites();
+    return this._allArticles().filter(a => favIds.has(a.id));
+  });
 
   // Para compatibilidad donde se requieran todos (por si acaso)
   readonly articles = this._allArticles.asReadonly();
@@ -137,5 +143,58 @@ export class ArticlesService {
       },
       error: (err) => console.error("Error al eliminar artículo:", err),
     });
+  }
+
+  // Interacciones locales
+  likeArticle(id: string): void {
+    this._allArticles.update(articles => articles.map(a => {
+      if (a.id === id) {
+        return { ...a, likes: (a.likes || 0) + 1 };
+      }
+      return a;
+    }));
+  }
+
+  shareArticle(id: string): void {
+    this._allArticles.update(articles => articles.map(a => {
+      if (a.id === id) {
+        return { ...a, shares: (a.shares || 0) + 1 };
+      }
+      return a;
+    }));
+  }
+
+  addComment(articleId: string, author: string, text: string): void {
+    this._allArticles.update(articles => articles.map(a => {
+      if (a.id === articleId) {
+        const comentarios = a.comments || [];
+        const nuevoComentario = {
+          id: Date.now().toString(),
+          author: author,
+          avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(author)}`,
+          text: text,
+          date: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+        };
+        const nuevosComentarios = [nuevoComentario, ...comentarios];
+        return { ...a, comments: nuevosComentarios, commentsCount: nuevosComentarios.length };
+      }
+      return a;
+    }));
+  }
+
+  toggleFavorite(id: string): void {
+    this._favorites.update(favs => {
+      const newFavs = new Set(favs);
+      if (newFavs.has(id)) {
+        newFavs.delete(id);
+      } else {
+        newFavs.add(id);
+      }
+      return newFavs;
+    });
+  }
+
+  getFavorites(): Article[] {
+    return this.favorites();
   }
 }

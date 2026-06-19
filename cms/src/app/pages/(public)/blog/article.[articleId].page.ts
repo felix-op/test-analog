@@ -234,15 +234,30 @@ export default class ArticleDetailPage implements OnInit {
   }
 
   likeArticle(id: string) {
-    console.log("likeArticle", id);
+    this.articlesService.likeArticle(id);
+    this.article.update(a => a ? { ...a, likes: (a.likes || 0) + 1 } : a);
   }
 
   shareArticle(id: string) {
-    console.log("shareArticle", id);
+    this.articlesService.shareArticle(id);
+    this.article.update(a => a ? { ...a, shares: (a.shares || 0) + 1 } : a);
   }
 
   addComment(event: { author: string; text: string }) {
-    console.log("addComment", { articleId: this.articleId, ...event });
+    this.articlesService.addComment(this.articleId, event.author, event.text);
+    this.article.update(a => {
+      if (!a) return a;
+      const comentarios = a.comments || [];
+      const nuevoComentario = {
+        id: Date.now().toString(),
+        author: event.author,
+        avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(event.author)}`,
+        text: event.text,
+        date: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+      };
+      const nuevosComentarios = [nuevoComentario, ...comentarios];
+      return { ...a, comments: nuevosComentarios, commentsCount: nuevosComentarios.length };
+    });
   }
 
   openRelated(article: Article) {
