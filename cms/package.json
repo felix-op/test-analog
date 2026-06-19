@@ -16,6 +16,9 @@
   },
   "private": true,
   "dependencies": {
+    "@editorjs/editorjs": "2.31.6",
+    "@editorjs/header": "2.8.9",
+    "@editorjs/list": "2.0.9",
     "@analogjs/content": "2.6.1",
     "@analogjs/router": "2.6.1",
     "@angular/animations": "22.0.0",

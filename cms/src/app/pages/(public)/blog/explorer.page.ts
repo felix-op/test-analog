@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, input } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { ArticlesService } from "@services/articles.service";
 import { Article } from "@models/article.model";
 import { ButtonAddComponent } from "@components/button-add.component";
@@ -171,6 +171,7 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
 })
 export default class ExplorerPage {
   protected readonly service = inject(ArticlesService);
+  private readonly router = inject(Router);
 
   selectedCategory = input<string | null>(null);
   searchQuery = input<string>("");
@@ -192,10 +193,12 @@ export default class ExplorerPage {
   }
 
   onCreateArticle(): void {
-    // TODO: navegar a /blog/article/new cuando exista el editor
+    this.router.navigate(['/blog/article-editor']);
   }
 
   onUpdateArticle(article: Article): void {
-    // TODO: navegar a /blog/article/:id/edit cuando exista el editor
+    this.router.navigate(['/blog/article-editor'], {
+      queryParams: { articleId: article.id },
+    });
   }
 }
