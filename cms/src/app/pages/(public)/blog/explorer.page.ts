@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input } from "@angular/core";
+import { AuthService } from "../../../core/services/auth.service";
 import { Router, RouterLink } from "@angular/router";
 import { ArticlesService } from "@services/articles.service";
 import { Article } from "@models/article.model";
@@ -38,7 +39,9 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
           }
         </h2>
 
-        <app-button-add (onClick)="onCreateArticle()" />
+        @if (authService.isAuthenticated()) {
+          <app-button-add (onClick)="onCreateArticle()" />
+        }
       </div>
 
       <!-- Estado de carga inicial -->
@@ -145,10 +148,12 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
                   </span>
                 </div>
 
-                <div class="flex items-center gap-1.5">
-                  <app-button-edit (onClick)="onUpdateArticle(art)" />
-                  <app-button-delete (onClick)="service.deleteArticle(art.id)" />
-                </div>
+                @if (authService.isAuthenticated()) {
+                  <div class="flex items-center gap-1.5">
+                    <app-button-edit (onClick)="onUpdateArticle(art)" />
+                    <app-button-delete (onClick)="service.deleteArticle(art.id)" />
+                  </div>
+                }
               </div>
             </div>
           }
@@ -191,6 +196,7 @@ import { IconChevronDownComponent } from "@components/icon-chevron-down.componen
 export default class ExplorerPage {
   protected readonly service = inject(ArticlesService);
   private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
   readonly skeletons = Array(6).fill(0);
 
   selectedCategory = input<string | null>(null);

@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from "@angular/core";
+import { AuthService } from "../services/auth.service";
 import { Router, NavigationEnd } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { filter, map, startWith } from "rxjs";
@@ -36,26 +37,37 @@ import { FormsModule } from "@angular/forms";
         }
       </div>
 
-      <!-- Buscador por temas y título -->
-      <div class="relative w-72">
-        <span
-          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"
-        >
-          <app-icon-search />
-        </span>
-        <input
-          type="text"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="onSearch($event)"
-          placeholder="Buscar noticias o temas relacionados..."
-          class="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
-        />
+      <!-- Buscador y Auth -->
+      <div class="flex items-center gap-4">
+        <div class="relative w-72">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <app-icon-search />
+          </span>
+          <input
+            type="text"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="onSearch($event)"
+            placeholder="Buscar noticias o temas relacionados..."
+            class="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
+          />
+        </div>
+        
+        @if (authService.isAuthenticated()) {
+          <button (click)="logout()" class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg px-4 py-1.5 transition-colors cursor-pointer">
+            Cerrar Sesión
+          </button>
+        } @else {
+          <button (click)="login()" class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg px-4 py-1.5 transition-colors cursor-pointer">
+            Iniciar Sesión
+          </button>
+        }
       </div>
     </header>
   `,
 })
 export class BlogHeaderComponent {
   private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -94,5 +106,13 @@ export class BlogHeaderComponent {
     this.router.navigate(["/blog/explorer"], {
       queryParams: { searchQuery: this.searchQuery() || undefined },
     });
+  }
+
+  login() {
+    this.authService.login().subscribe();
+  }
+
+  logout() {
+    this.authService.logout().subscribe();
   }
 }

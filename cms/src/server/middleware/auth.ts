@@ -1,4 +1,4 @@
-import { defineEventHandler, EventHandlerRequest, getRequestURL, H3Event, parseCookies, sendRedirect, setHeaders } from 'h3';
+import { defineEventHandler, EventHandlerRequest, getRequestURL, H3Event, parseCookies, sendRedirect, createError } from 'h3';
 
 type EventoMiddleware = H3Event<EventHandlerRequest>;
 
@@ -10,26 +10,29 @@ function filterUrls(event: EventoMiddleware, url: string): boolean {
     return getRequestURL(event).pathname.startsWith(url);
 }
 
-// Devolver headers
-// export default defineEventHandler((event) => {
-//   if (exactUrl(event, '/checkout')) {
-//     console.log('event url', event.node.req.originalUrl);
-
-//     setHeaders(event, {
-//       'x-analog-checkout': 'true',
-//     });
-//   }
-// });
-
 // Verficar que esté autenticado
 export default defineEventHandler(async (event) => {
+  // Verificamos protección para el editor de artículos
+  if (filterUrls(event, '/blog/article-editor')) {
+    const cookies = parseCookies(event);
+    const isLoggedIn = cookies['authToken'];
+
+    if (!isLoggedIn) {
+      // Rebotar con 404 lanzando un error en lugar de retornar
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Not Found'
+      });
+    }
+  }
+
+  // Dejamos la protección existente para admin intacta, si es necesaria
   if (filterUrls(event, '/admin')) {
     const cookies = parseCookies(event);
     const isLoggedIn = cookies['authToken'];
 
     if (!isLoggedIn) {
-      sendRedirect(event, '/login', 401);
+      await sendRedirect(event, '/login', 401);
     }
   }
 });
-

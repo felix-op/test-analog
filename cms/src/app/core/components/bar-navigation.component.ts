@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output } from "@angular/core";
+import { AuthService } from "../services/auth.service";
 import { NavigationEnd, Router } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { filter, map, startWith } from "rxjs";
@@ -53,10 +54,12 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
             <span>Inicio / Explorador</span>
           </app-bar-navegation-item>
 
-          <app-bar-navegation-item link="/blog/article-editor">
-            <app-icon-edit />
-            <span>Escribir Artículo</span>
-          </app-bar-navegation-item>
+          @if (authService.isAuthenticated()) {
+            <app-bar-navegation-item link="/blog/article-editor">
+              <app-icon-edit />
+              <span>Escribir Artículo</span>
+            </app-bar-navegation-item>
+          }
         </nav>
 
         <hr class="border-slate-200 my-4 shrink-0" />
@@ -123,6 +126,7 @@ import { BarNavegationCategoryComponent } from "./bar-navigation-category.compon
 })
 export class BarNavegacionComponent {
   private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
 
   categories = input<string[]>([]);
   hasMoreCategories = input<boolean>(true);
