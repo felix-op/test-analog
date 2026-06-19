@@ -145,6 +145,7 @@ export class BarNavegacionComponent {
     const next = this.activeCategory() === category ? undefined : category;
     this.router.navigate(["/blog/explorer"], {
       queryParams: { selectedCategory: next },
+      queryParamsHandling: "merge",
     });
   }
 

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from "@angular/core";
+import { Component, computed, effect, inject, signal } from "@angular/core";
 import { Router, NavigationEnd } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { filter, map, startWith } from "rxjs";
@@ -57,23 +57,33 @@ import { FormsModule } from "@angular/forms";
 export class BlogHeaderComponent {
   private readonly router = inject(Router);
 
-  private readonly queryParams = toSignal(
+  private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
-      map(() => this.router.parseUrl(this.router.url).queryParams),
-      startWith(this.router.parseUrl(this.router.url).queryParams),
+      map((e) => (e as NavigationEnd).urlAfterRedirects),
+      startWith(this.router.url),
     ),
   );
 
   readonly isIndexRoute = computed(
-    () => this.router.url.split("?")[0] === "/blog/explorer",
+    () => (this.currentUrl() ?? "").split("?")[0] === "/blog/explorer",
   );
 
-  readonly searchQuery = computed(
-    () => (this.queryParams()?.["searchQuery"] as string) ?? "",
-  );
+  readonly searchQuery = signal("");
+
+  constructor() {
+    // Sincroniza el valor solo cuando se navega al explorador
+    effect(() => {
+      const url = this.currentUrl() ?? "";
+      if (url.split("?")[0] === "/blog/explorer") {
+        const params = this.router.parseUrl(url).queryParams;
+        this.searchQuery.set((params["searchQuery"] as string) ?? "");
+      }
+    });
+  }
 
   onSearch(value: string) {
+    this.searchQuery.set(value);
     this.router.navigate(["/blog/explorer"], {
       queryParams: { searchQuery: value || undefined },
       queryParamsHandling: "merge",
@@ -81,6 +91,8 @@ export class BlogHeaderComponent {
   }
 
   goBack() {
-    this.router.navigate(["/blog/explorer"]);
+    this.router.navigate(["/blog/explorer"], {
+      queryParams: { searchQuery: this.searchQuery() || undefined },
+    });
   }
 }
