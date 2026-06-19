@@ -4,6 +4,7 @@ import { Comment } from "@models/comment.model";
 @Component({
   selector: "app-article-comment-list",
   standalone: true,
+  host: { class: 'block' },
   template: `
     <div class="space-y-4">
       @for (comment of comments(); track comment.id) {

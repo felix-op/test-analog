@@ -5,7 +5,7 @@ import { Article } from "@models/article.model";
   selector: "app-article-sidebar",
   standalone: true,
   template: `
-    <aside class="lg:col-span-4 space-y-6">
+    <aside class="space-y-6 w-full">
 
       <!-- Compartir en redes -->
       <div class="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm space-y-4">

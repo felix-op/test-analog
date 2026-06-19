@@ -5,26 +5,25 @@ import { CampoInputComponent } from "./campo-input.component";
   selector: "app-article-comment-form",
   standalone: true,
   imports: [CampoInputComponent],
+  host: { class: 'block' },
   template: `
-    <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 space-y-3">
+    <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 space-y-4">
       <span class="text-xs font-semibold text-slate-500">Deja tu comentario</span>
 
       <app-campo-input
         label="Tu nombre"
         placeholder="Ej: Juan García"
         [(value)]="author"
+        [required]="true"
       />
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-slate-600">Comentario</label>
-        <textarea
-          [value]="text()"
-          (input)="text.set(val($event))"
-          rows="3"
-          placeholder="Escribe aquí tu opinión..."
-          class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
-        ></textarea>
-      </div>
+      <app-campo-input
+        type="textarea"
+        label="Comentario"
+        placeholder="Escribe aquí tu opinión..."
+        [(value)]="text"
+        [required]="true"
+      />
 
       <div class="flex justify-end">
         <button

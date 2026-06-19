@@ -159,6 +159,7 @@ import { ArticleCommentListComponent } from "@components/article-comment-list.co
 
         <!-- Sidebar derecho -->
         <app-article-sidebar
+          class="lg:col-span-4 block"
           [relatedArticles]="[]"
           (share)="shareArticle(article()!.id)"
           (articleSelect)="openRelated($event)"
